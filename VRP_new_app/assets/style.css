@@ -1,0 +1,42 @@
+/* Custom CSS for enhanced UI */
+.stApp {
+    background-color: #00ffff;
+}
+
+.stTitle {
+    color: #2c3e50 !important;
+}
+
+.stButton>button {
+    background-color: #3498db !important;
+    color: white !important;
+    border-radius: 8px;
+    padding: 10px 24px;
+    transition: all 0.3s;
+}
+
+.stButton>button:hover {
+    background-color: #2980b9 !important;
+    transform: scale(1.05);
+}
+
+.stMetric {
+    background-color: white !important;
+    border-radius: 10px;
+    padding: 15px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.stProgress>div>div {
+    background-color: #3498db !important;
+}
+
+.stAlert {
+    border-radius: 10px !important;
+}
+
+.stExpander {
+    background-color: white !important;
+    border-radius: 10px !important;
+    margin-bottom: 1rem;
+}
