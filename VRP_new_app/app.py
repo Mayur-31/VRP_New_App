@@ -10,8 +10,11 @@ st.set_page_config(page_title="🚛 Smart Route Optimizer", layout="wide", page_
 mileage.set_api_key(st.secrets["OPENCAGE_API_KEY"])
 
 def load_css():
-    with open("assets/style.css") as f:
-        st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
+    try:
+        with open("assets/style.css") as f:
+            st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
+    except FileNotFoundError:
+        st.warning("Warning: style.css not found. Using default Streamlit styling.")
 
 load_css()
 
@@ -47,11 +50,11 @@ def main():
 
     # Performance metrics & data download
     total_loaded = processed_df['LOADED MILES'].sum()
-    total_empty  = processed_df['EMPTY MILES'].sum()
+    total_empty = processed_df['EMPTY MILES'].sum()
     st.subheader("📈 Summary Metrics")
     st.metric("Total Loaded", f"{total_loaded:.1f} mi")
-    st.metric("Total Empty",  f"{total_empty:.1f} mi")
-    st.metric("Grand Total",  f"{total_loaded + total_empty:.1f} mi")
+    st.metric("Total Empty", f"{total_empty:.1f} mi")
+    st.metric("Grand Total", f"{total_loaded + total_empty:.1f} mi")
     st.download_button(
         "💾 Download Processed CSV",
         processed_df.to_csv(index=False).encode(),
@@ -82,7 +85,7 @@ def main():
                 for i in range(len(route)-1)
             )
             st.subheader(f"Driver: {selected}")
-            st.markdown(f"**Route:**  {' → '.join(route)}  \n**Total Distance:** {total_miles:.2f} mi")
+            st.markdown(f"**Route:** {' → '.join(route)} \n**Total Distance:** {total_miles:.2f} mi")
 
             # mini‐map for this driver only
             tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".html")
