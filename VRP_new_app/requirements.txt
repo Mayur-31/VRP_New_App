@@ -16,5 +16,4 @@ ortools
 folium
 polyline
 numpy
->>>>>>> 9d5543173034617e7bec25b9cd84960b0e24673f
 tqdm
