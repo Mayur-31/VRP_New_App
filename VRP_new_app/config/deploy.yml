@@ -1,0 +1,30 @@
+service: vrp_new_app
+registry:
+  username: # Put your Dockerhub username Here
+  password: <%= ENV["KAMAL_REGISTRY_PASSWORD"] %>
+servers:
+  web:
+    - placeholder_server_ip  # Replace with your actual server IP later
+env:
+  clear:
+    STREAMLIT_SERVER_ADDRESS: "0.0.0.0"
+    STREAMLIT_SERVER_PORT: "8501"
+    STREAMLIT_SERVER_HEADLESS: "true"
+    STREAMLIT_BROWSER_SERVER_ADDRESS: "localhost"
+  secret:
+    - OPENCAGE_API_KEY
+image: # Put your Dockerhub username Here/vrp_new_app_app:latest
+builder:
+  context: .
+  dockerfile: Dockerfile
+  arch: amd64
+proxy:
+  ssl: false
+  app_port: 8501
+accessories:
+  osrm:
+    image: # Put your Dockerhub username Here/vrp_new_app_osrm:latest
+    host: placeholder_server_ip  # Replace with your actual server IP later
+    cmd: osrm-routed --algorithm mld /data/united-kingdom-latest.osrm
+    volumes:
+      - ./osrm:/data

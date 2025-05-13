@@ -1,0 +1,127 @@
+# Project Setup and Running Instructions for VRP_new_app
+
+This document provides step-by-step instructions to set up and run the `VRP_new_app` project. You’ll install tools, download large OSRM files via a script, configure credentials, and run the project using Docker.
+
+---
+
+## Prerequisites
+
+### 1. Install Docker
+Docker is required to build and run the application.
+
+- **Windows**:
+  - Download Docker Desktop from https://www.docker.com/products/docker-desktop.
+  - Run the installer and follow the wizard.
+  - Launch Docker Desktop and ensure it’s running (check system tray).
+- **macOS**:
+  - Download Docker Desktop from https://www.docker.com/products/docker-desktop.
+  - Open the `.dmg` file, drag Docker to Applications, and launch it.
+  - Ensure Docker Desktop is running (check menu bar).
+- **Linux** (e.g., Ubuntu):
+  - Run:
+    sudo apt-get update
+    sudo apt-get install docker-ce docker-ce-cli containerd.io
+    sudo usermod -aG docker $USER
+    Log out and back in.
+- **Verify**:
+  docker --version
+  Expect output like `Docker version 20.10.7`.
+
+### 2. Create a Docker Hub Account
+- Go to https://hub.docker.com/ and sign up for a free account.
+- Note your username and password (or create a personal access token via Account Settings > Security).
+
+### 3. Install Git
+- **Windows/macOS**:
+  - Download Git from https://git-scm.com/downloads.
+  - Run the installer with default settings.
+- **Linux**:
+  sudo apt-get install git
+- **Verify**:
+  git --version
+  Expect output like `git version 2.25.1`.
+
+### 4. Install Python
+- **Windows/macOS**:
+  - Download Python from https://www.python.org/downloads/.
+  - Install with default settings, ensuring `Add Python to PATH` is checked.
+- **Linux**:
+  sudo apt-get install python3 python3-pip
+- **Verify**:
+  python --version
+  Expect output like `Python 3.9.0`.
+
+### 5. Install Python Dependencies
+- Install `gdown` for downloading OSRM files:
+  pip install gdown
+
+---
+
+## Project Setup
+
+### 1. Clone the Repository
+- Open a terminal (or PowerShell on Windows).
+- Navigate to your desired directory:
+  cd /path/to/your/directory
+- Clone the repository:
+  git clone https://github.com/Mayur-31/VRP_New_App.git
+  cd VRP_New_App
+
+### 2. Download OSRM Files
+- Run the download script to fetch large OSRM files from Google Drive:
+  python download_osrm_files.py
+- This downloads files like `united-kingdom-latest.osrm` to the `osrm/` directory.
+- If the script fails, manually download files from [Google Drive link] and place them in `osrm/`.
+
+### 3. Set Up Environment Variables
+The project requires Docker Hub and OpenCage API credentials.
+
+- Create the secrets file:
+  mkdir .kamal
+  echo 'KAMAL_REGISTRY_PASSWORD="Your Dockerhub login password"' > .kamal/secrets
+  echo 'OPENCAGE_API_KEY="Your API KEY"' >> .kamal/secrets
+- Replace placeholders with:
+  - Your Docker Hub password or personal access token.
+  - An OpenCage API key from https://opencagedata.com/.
+
+- Alternatively, set variables in the terminal:
+  - **Windows (PowerShell)**:
+    $env:KAMAL_REGISTRY_PASSWORD = "Your Dockerhub login password"
+    $env:OPENCAGE_API_KEY = "Your API KEY"
+  - **macOS/Linux**:
+    export KAMAL_REGISTRY_PASSWORD="Your Dockerhub login password"
+    export OPENCAGE_API_KEY="Your API KEY"
+
+---
+
+## Building and Running the Application
+
+### 1. Build Docker Images
+- Ensure Docker is running.
+- Build images:
+  docker-compose build
+  This may take a few minutes.
+
+### 2. Run the Application
+- Start services:
+  docker-compose up
+- Access the app at http://localhost:8501.
+- Press `Ctrl+C` to stop.
+
+### 3. Verify the Application
+- Open http://localhost:8501 in a browser.
+- Upload a test CSV to check route processing.
+- Test OSRM:
+  curl "http://localhost:5000/route/v1/driving/-2.0,54.0;-1.9,54.1"
+  Expect a JSON response with route details.
+
+---
+
+## Additional Notes
+
+- **Deployment**:
+  - Edit `config/deploy.yml` with server details (IP, username).
+  - Deploy with:
+    kamal setup
+    kamal deploy
+  - Ensure SSH access to the server.
