@@ -125,3 +125,6 @@ The project requires Docker Hub and OpenCage API credentials.
     kamal setup
     kamal deploy
   - Ensure SSH access to the server.
+### Notes on Geocoding
+- The app uses Postcodes.io (https://postcodes.io/) to geocode UK postcodes in `mileage.py`. It requires the `requests` library, which is installed via `requirements.txt` in the Docker image.
+- Ensure your Docker host has internet access to reach the Postcodes.io API.
