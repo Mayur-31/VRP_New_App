@@ -1,130 +1,662 @@
-# Project Setup and Running Instructions for VRP_new_app
+Project Setup and Running Instructions for VRP_new_app
 
-This document provides step-by-step instructions to set up and run the `VRP_new_app` project. You’ll install tools, download large OSRM files via a script, configure credentials, and run the project using Docker.
+Overview
 
----
+This project sets up a vehicle routing optimization application (vrp_new_app) with self-hosted Postcodes.io in Docker. The application uses OSRM for routing and Postcodes.io for postcode geocoding. The OSRM service requires large data files (approximately 3-4 GB, 28 files), which are downloaded using a provided script. Below are the steps to install prerequisites, download OSRM data, set up the project, and run it locally or deploy it to a server.
 
-## Prerequisites
+Prerequisites
 
-### 1. Install Docker
-Docker is required to build and run the application.
+Before running the project, ensure you have the following tools and accounts:
 
-- **Windows**:
-  - Download Docker Desktop from https://www.docker.com/products/docker-desktop.
-  - Run the installer and follow the wizard.
-  - Launch Docker Desktop and ensure it’s running (check system tray).
-- **macOS**:
-  - Download Docker Desktop from https://www.docker.com/products/docker-desktop.
-  - Open the `.dmg` file, drag Docker to Applications, and launch it.
-  - Ensure Docker Desktop is running (check menu bar).
-- **Linux** (e.g., Ubuntu):
-  - Run:
-    sudo apt-get update
-    sudo apt-get install docker-ce docker-ce-cli containerd.io
-    sudo usermod -aG docker $USER
-    Log out and back in.
-- **Verify**:
-  docker --version
-  Expect output like `Docker version 20.10.7`.
+1. Docker
 
-### 2. Create a Docker Hub Account
-- Go to https://hub.docker.com/ and sign up for a free account.
-- Note your username and password (or create a personal access token via Account Settings > Security).
+Docker is required to build and run the application containers.
 
-### 3. Install Git
-- **Windows/macOS**:
-  - Download Git from https://git-scm.com/downloads.
-  - Run the installer with default settings.
-- **Linux**:
-  sudo apt-get install git
-- **Verify**:
-  git --version
-  Expect output like `git version 2.25.1`.
 
-### 4. Install Python
-- **Windows/macOS**:
-  - Download Python from https://www.python.org/downloads/.
-  - Install with default settings, ensuring `Add Python to PATH` is checked.
-- **Linux**:
-  sudo apt-get install python3 python3-pip
-- **Verify**:
-  python --version
-  Expect output like `Python 3.9.0`.
 
-### 5. Install Python Dependencies
-- Install `gdown` for downloading OSRM files:
-  pip install gdown
 
----
 
-## Project Setup
+Windows:
 
-### 1. Clone the Repository
-- Open a terminal (or PowerShell on Windows).
-- Navigate to your desired directory:
-  cd /path/to/your/directory
-- Clone the repository:
-  git clone https://github.com/Mayur-31/VRP_New_App.git
-  cd VRP_New_App
 
-### 2. Download OSRM Files
-- Run the download script to fetch large OSRM files from Google Drive:
-  python download_osrm_files.py
-- This downloads files like `united-kingdom-latest.osrm` to the `osrm/` directory.
-- If the script fails, manually download files from [Google Drive link] and place them in `osrm/`.
 
-### 3. Set Up Environment Variables
-The project requires Docker Hub and OpenCage API credentials.
 
-- Create the secrets file:
-  mkdir .kamal
-  echo 'KAMAL_REGISTRY_PASSWORD="Your Dockerhub login password"' > .kamal/secrets
-  echo 'OPENCAGE_API_KEY="Your API KEY"' >> .kamal/secrets
-- Replace placeholders with:
-  - Your Docker Hub password or personal access token.
-  - An OpenCage API key from https://opencagedata.com/.
 
-- Alternatively, set variables in the terminal:
-  - **Windows (PowerShell)**:
-    $env:KAMAL_REGISTRY_PASSWORD = "Your Dockerhub login password"
-    $env:OPENCAGE_API_KEY = "Your API KEY"
-  - **macOS/Linux**:
-    export KAMAL_REGISTRY_PASSWORD="Your Dockerhub login password"
-    export OPENCAGE_API_KEY="Your API KEY"
+Download Docker Desktop from https://www.docker.com/products/docker-desktop.
 
----
 
-## Building and Running the Application
 
-### 1. Build Docker Images
-- Ensure Docker is running.
-- Build images:
-  docker-compose build
-  This may take a few minutes.
+Run the installer and follow the setup wizard.
 
-### 2. Run the Application
-- Start services:
-  docker-compose up
-- Access the app at http://localhost:8501.
-- Press `Ctrl+C` to stop.
 
-### 3. Verify the Application
-- Open http://localhost:8501 in a browser.
-- Upload a test CSV to check route processing.
-- Test OSRM:
-  curl "http://localhost:5000/route/v1/driving/-2.0,54.0;-1.9,54.1"
-  Expect a JSON response with route details.
 
----
+Launch Docker Desktop and ensure it’s running (check the system tray for the Docker icon).
 
-## Additional Notes
 
-- **Deployment**:
-  - Edit `config/deploy.yml` with server details (IP, username).
-  - Deploy with:
-    kamal setup
-    kamal deploy
-  - Ensure SSH access to the server.
-### Notes on Geocoding
-- The app uses Postcodes.io (https://postcodes.io/) to geocode UK postcodes in `mileage.py`. It requires the `requests` library, which is installed via `requirements.txt` in the Docker image.
-- Ensure your Docker host has internet access to reach the Postcodes.io API.
+
+macOS:
+
+
+
+
+
+Download Docker Desktop from https://www.docker.com/products/docker-desktop.
+
+
+
+Open the .dmg file, drag Docker to the Applications folder, and launch it.
+
+
+
+Ensure Docker Desktop is running (check the menu bar).
+
+
+
+Linux (e.g., Ubuntu):
+
+
+
+
+
+Open a terminal and run:
+
+sudo apt-get update
+sudo apt-get install docker-ce docker-ce-cli containerd.io
+
+
+
+Add your user to the Docker group to run Docker without sudo:
+
+sudo usermod -aG docker $USER
+
+Log out and back in for this to take effect.
+
+
+
+Verify Installation:
+
+
+
+
+
+Run:
+
+docker --version
+
+
+
+Expected output: e.g., Docker version 20.10.7. Troubleshoot if the command fails.
+
+2. DockerHub Account
+
+A DockerHub account is needed to pull/push Docker images.
+
+
+
+
+
+Go to https://hub.docker.com/.
+
+
+
+Sign up for a free account.
+
+
+
+Note your DockerHub username and password (or create a personal access token via Account Settings > Security for better security).
+
+3. Git
+
+Git is required to clone the project repository from GitHub.
+
+
+
+
+
+Windows/macOS:
+
+
+
+
+
+Download Git from https://git-scm.com/downloads.
+
+
+
+Run the installer with default settings.
+
+
+
+Linux (e.g., Ubuntu):
+
+
+
+
+
+Install Git:
+
+sudo apt-get install git
+
+
+
+Verify Installation:
+
+
+
+
+
+Run:
+
+git --version
+
+
+
+Expected output: e.g., git version 2.25.1.
+
+4. Python
+
+Python is required to run the download_osrm_files.py script for downloading OSRM data.
+
+
+
+
+
+Windows/macOS:
+
+
+
+
+
+Download Python from https://www.python.org/downloads/.
+
+
+
+Run the installer, ensuring "Add Python to PATH" is checked.
+
+
+
+Linux (e.g., Ubuntu):
+
+
+
+
+
+Install Python:
+
+sudo apt-get install python3 python3-pip
+
+
+
+Verify Installation:
+
+
+
+
+
+Run:
+
+python3 --version
+
+
+
+Expected output: e.g., Python 3.8.10.
+
+5. OpenCage API Key (Optional)
+
+If the application uses geocoding beyond Postcodes.io, you’ll need an OpenCage API key.
+
+
+
+
+
+Sign up at https://opencagedata.com/.
+
+
+
+Get your API key from the dashboard.
+
+Project Setup
+
+Follow these steps to set up the project on your computer.
+
+1. Clone the Repository
+
+
+
+
+
+Open a terminal (or PowerShell on Windows).
+
+
+
+Navigate to your desired directory:
+
+cd /path/to/your/directory
+
+
+
+Clone the GitHub repository:
+
+git clone https://github.com/your_username/VRP_new_app.git
+
+(Replace your_username with the actual GitHub username hosting the repository.)
+
+2. Navigate to the Project Directory
+
+
+
+
+
+Move into the project folder:
+
+cd VRP_new_app
+
+3. Download OSRM Data Files
+
+The OSRM service requires data files (e.g., united-kingdom-latest.osrm, approximately 3-4 GB, 28 files). These are not included in the repository due to their size and are downloaded using the download_osrm_files.py script.
+
+
+
+
+
+Ensure Python and pip are installed (see Prerequisites).
+
+
+
+Install required Python packages (e.g., requests if used in the script):
+
+pip3 install requests
+
+
+
+Run the download script:
+
+python3 download_osrm_files.py
+
+
+
+The script will download the OSRM files to the ./osrm directory. This may take some time depending on your internet speed.
+
+
+
+Verify the files:
+
+ls -lh ./osrm
+
+
+
+
+
+Ensure united-kingdom-latest.osrm and related files (approximately 28 files, 3-4 GB total) are present.
+
+
+
+If the script is missing or fails, contact the repository owner for the script or download the files manually from the OSRM data source (e.g., http://download.geofabrik.de/europe/united-kingdom-latest.osm.pbf) and process them using osrm-extract and osrm-contract as per OSRM documentation.
+
+4. Update Credential Placeholders
+
+The project requires credentials for DockerHub, PostgreSQL, and optionally OpenCage. Update these in the configuration files or set them as environment variables.
+
+
+
+
+
+For Local Testing (docker-compose.yaml):
+
+
+
+
+
+Open docker-compose.yaml in a text editor.
+
+
+
+Replace Your_secure_password with a secure password for the PostgreSQL database:
+
+services:
+  postcodes-db:
+    environment:
+      - POSTGRES_USER=postcodesio
+      - POSTGRES_PASSWORD=your_secure_password  # Replace with your password
+      - POSTGRES_DB=postcodesio
+  postcodes-app:
+    environment:
+      - DATABASE_URL=postgresql://postcodesio:your_secure_password@postcodes-db:5432/postcodesio
+      - LOG_LEVEL=trace
+
+
+
+Ensure the password in POSTGRES_PASSWORD and DATABASE_URL is identical.
+
+
+
+For Deployment (deploy.yml):
+
+
+
+
+
+Open config/deploy.yml in a text editor.
+
+
+
+Update with your DockerHub username:
+
+registry:
+  username: your_dockerhub_username
+image: your_dockerhub_username/vrp_new_app_app:latest
+accessories:
+  osrm:
+    image: your_dockerhub_username/vrp_new_app_osrm:latest
+
+
+
+Set environment variables for sensitive information:
+
+
+
+
+
+Windows (PowerShell):
+
+$env:KAMAL_REGISTRY_PASSWORD = "your_dockerhub_password"
+$env:POSTGRES_PASSWORD = "your_secure_password"
+$env:OPENCAGE_API_KEY = "your_opencage_key"
+
+
+
+macOS/Linux:
+
+export KAMAL_REGISTRY_PASSWORD=your_dockerhub_password
+export POSTGRES_PASSWORD=your_secure_password
+export OPENCAGE_API_KEY=your_opencage_key
+
+
+
+Alternatively, create a secrets file:
+
+
+
+
+
+Create a directory and file:
+
+mkdir .kamal
+touch .kamal/secrets
+
+
+
+Add to .kamal/secrets:
+
+KAMAL_REGISTRY_PASSWORD=your_dockerhub_password
+POSTGRES_PASSWORD=your_secure_password
+OPENCAGE_API_KEY=your_opencage_key
+
+
+
+Note: Ensure POSTGRES_PASSWORD matches in both docker-compose.yaml and deploy.yml to avoid database connection issues.
+
+Building and Running the Application
+
+Use Docker to build and run the application locally or deploy it to a server.
+
+1. Build Docker Images
+
+
+
+
+
+Ensure Docker is running.
+
+
+
+Build the images defined in docker-compose.yaml:
+
+docker-compose build
+
+
+
+
+
+This builds images for app, osrm, and postcodes-app services. The first build may take several minutes.
+
+2. Run the Application Locally
+
+
+
+
+
+Start the services in detached mode:
+
+docker-compose up -d
+
+
+
+Verify the services are running:
+
+docker-compose ps
+
+
+
+
+
+Expected output: Services (app, osrm, postcodes-db, postcodes-app) should be in the Up state.
+
+
+
+Access the application:
+
+
+
+
+
+Streamlit App: Open a browser and go to http://localhost:8501.
+
+
+
+Postcodes.io API: Test with:
+
+curl -v http://localhost:8000/postcodes/EC1A1BB
+
+
+
+To stop the services:
+
+docker-compose down
+
+3. Verify the Application
+
+
+
+
+
+Streamlit App:
+
+
+
+
+
+At http://localhost:8501, upload a test CSV file to confirm the app processes routes correctly.
+
+
+
+OSRM Service:
+
+
+
+
+
+Test with:
+
+curl "http://localhost:5000/route/v1/driving/-2.0,54.0;-1.9,54.1"
+
+
+
+Expected output: A JSON response with route details.
+
+
+
+Postcodes.io Service:
+
+
+
+
+
+Test with:
+
+curl -v http://localhost:8000/postcodes/EC1A1BB
+
+
+
+Expected output: A JSON response with postcode details (e.g., latitude, longitude).
+
+
+
+If you get a 500 error, see the Troubleshooting section.
+
+Deployment (Optional)
+
+To deploy the application to a remote server using Kamal:
+
+
+
+
+
+Update config/deploy.yml with your server’s IP:
+
+servers:
+  web:
+    - your_server_ip
+
+
+
+Ensure SSH access to the server and update any other placeholders (e.g., OSRM data path in the accessories section).
+
+
+
+Deploy the application:
+
+kamal setup
+kamal deploy
+
+
+
+Verify the deployment by accessing the Streamlit app and Postcodes.io API on the server’s IP (ports 8501 and 8000, respectively).
+
+Troubleshooting
+
+
+
+
+
+500 Error on Postcodes.io:
+
+
+
+
+
+Check Logs:
+
+docker-compose logs postcodes-app
+
+Look for detailed error messages (enabled by LOG_LEVEL=trace).
+
+
+
+Verify Database Connectivity:
+
+docker exec -it <postcodes-app-container> psql $DATABASE_URL -c "SELECT 1;"
+
+Replace <postcodes-app-container> with the container name/ID (find with docker ps).
+
+
+
+Ensure Database is Populated:
+
+docker exec -it <postcodes-db-container> psql -U postcodesio -d postcodesio -c "SELECT COUNT(*) FROM postcodes;"
+
+If the count is low or zero, the database may need manual data import (see https://github.com/ideal-postcodes/postcodes.io#installation).
+
+
+
+Try Development Mode: In deploy.yml, change NODE_ENV to development for better error reporting:
+
+postcodes-app:
+  env:
+    clear:
+      NODE_ENV: development
+
+Rebuild and restart:
+
+docker-compose build postcodes-app
+docker-compose up -d
+
+
+
+OSRM Issues:
+
+
+
+
+
+If the OSRM service fails, ensure the united-kingdom-latest.osrm file and related files are present in the ./osrm directory:
+
+ls -lh ./osrm
+
+
+
+Re-run download_osrm_files.py if files are missing or corrupted.
+
+
+
+Service Dependencies:
+
+
+
+
+
+Services should start in order due to health checks. If a service fails to start, restart all services:
+
+docker-compose restart
+
+
+
+General Issues:
+
+
+
+
+
+Check all service logs:
+
+docker-compose logs
+
+
+
+Ensure Docker has sufficient resources (e.g., memory, CPU) in Docker Desktop settings.
+
+Additional Notes
+
+
+
+
+
+Replace all placeholders (e.g., your_dockerhub_username, your_secure_password, your_server_ip) with your actual credentials and details.
+
+
+
+If the Postcodes.io service fails with a 500 error, it may indicate a database issue or a bug in the idealpostcodes/postcodes.io:latest image. Report persistent issues to https://github.com/ideal-postcodes/postcodes.io/issues.
+
+
+
+For production deployment, consider securing the PostgreSQL password and other credentials using a secrets management tool instead of hardcoding.
+
+
+
+If you modify docker-compose.yaml or deploy.yml, rebuild the images:
+
+docker-compose build
+
+
+
+If the download_osrm_files.py script is missing or doesn’t work, contact the repository owner for assistance or refer to OSRM documentation for manual data preparation.
