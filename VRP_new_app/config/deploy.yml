@@ -1,19 +1,20 @@
 service: vrp_new_app
 registry:
-  username: # Put your Dockerhub username Here
+  username: # Replace with your DockerHub username
   password: <%= ENV["KAMAL_REGISTRY_PASSWORD"] %>
 servers:
   web:
-    - placeholder_server_ip  # Replace with your actual server IP later
+    - placeholder_server_ip  # Replace with your actual server IP
 env:
   clear:
     STREAMLIT_SERVER_ADDRESS: "0.0.0.0"
     STREAMLIT_SERVER_PORT: "8501"
     STREAMLIT_SERVER_HEADLESS: "true"
     STREAMLIT_BROWSER_SERVER_ADDRESS: "localhost"
+    POSTCODES_IO_URL: "http://postcodes-app:8000"
   secret:
     - OPENCAGE_API_KEY
-image: # Put your Dockerhub username Here/vrp_new_app_app:latest
+image: # Replace with your DockerHub username/vrp_new_app_app:latest
 builder:
   context: .
   dockerfile: Dockerfile
@@ -23,8 +24,35 @@ proxy:
   app_port: 8501
 accessories:
   osrm:
-    image: # Put your Dockerhub username Here/vrp_new_app_osrm:latest
-    host: placeholder_server_ip  # Replace with your actual server IP later
+    image: # Replace with your DockerHub username/vrp_new_app_osrm:latest
+    host: placeholder_server_ip
     cmd: osrm-routed --algorithm mld /data/united-kingdom-latest.osrm
     volumes:
       - ./osrm:/data
+  postcodes-db:
+    image: idealpostcodes/postcodes.io.db
+    host: placeholder_server_ip
+    env:
+      clear:
+        POSTGRES_USER: postcodesio
+        POSTGRES_DB: postcodesio
+      secret:
+        - POSTGRES_PASSWORD
+    volumes:
+      - postcodes-data:/var/lib/postgresql/data
+  postcodes-app:
+    build:
+      context: ./postcodes-app
+      dockerfile: Dockerfile
+    host: placeholder_server_ip
+    env:
+      clear:
+        DATABASE_URL: "postgresql://postcodesio:<%= ENV["POSTGRES_PASSWORD"] %>@postcodes-db:5432/postcodesio"
+        LOG_LEVEL: trace
+        NODE_ENV: production
+        PORT: 8000
+    depends_on:
+      - postcodes-db
+
+volumes:
+  postcodes-data:
