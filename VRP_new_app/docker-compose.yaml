@@ -9,8 +9,6 @@ services:
       timeout: 30s
       retries: 20
       start_period: 300s
-    volumes:
-      - ./osrm:/data
     command: osrm-routed --algorithm mld /data/united-kingdom-latest.osrm
 
   app:
@@ -65,5 +63,4 @@ services:
       start_period: 60s
 
 volumes:
-  osrm-data:
   postcodes-data:
