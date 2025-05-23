@@ -4,7 +4,7 @@ services:
     image: idealpostcodes/postcodes.io.db:latest
     environment:
       POSTGRES_USER: postcodesio
-      POSTGRES_PASSWORD: Mayur9850573459
+      POSTGRES_PASSWORD: # Put Your Secure password here
       POSTGRES_DATABASE: postcodesio
     ports:
       - "5432:5432"
@@ -26,7 +26,7 @@ services:
     environment:
       POSTGRES_HOST: postcodes-db
       POSTGRES_USER: postcodesio
-      POSTGRES_PASSWORD: Mayur9850573459
+      POSTGRES_PASSWORD: # Put Your Secure password here
       POSTGRES_DATABASE: postcodesio
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:8000 || exit 1"]  # Simpler check
