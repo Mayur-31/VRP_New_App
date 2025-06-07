@@ -1,0 +1,69 @@
+services:
+  # Postcodes.io Database Container
+  postcodes-db:
+    image: idealpostcodes/postcodes.io.db:latest
+    environment:
+      POSTGRES_USER: postcodesio
+      POSTGRES_PASSWORD: Mayur9850573459
+      POSTGRES_DATABASE: postcodesio
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postcodesio -d postcodesio"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Postcodes.io API Container
+  postcodes-app:
+    build: ./postcodes-app
+    #image: idealpostcodes/postcodes.io:latest
+    depends_on:
+      postcodes-db:
+        condition: service_healthy  # Wait for DB to be healthy
+    ports:
+      - "8000:8000"
+    environment:
+      POSTGRES_HOST: postcodes-db
+      POSTGRES_USER: postcodesio
+      POSTGRES_PASSWORD: Mayur9850573459
+      POSTGRES_DATABASE: postcodesio
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8000 || exit 1"]  # Simpler check
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 600s  # Increased to 10 minutes
+
+  # OSRM Container (unchanged)
+  osrm:
+    build: ./osrm
+    ports:
+      - "5000:5000"
+    depends_on:
+      - postcodes-app
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- 'http://localhost:5000/route/v1/driving/-2.0,54.0;-1.9,54.1' > /dev/null || exit 1"]
+      interval: 30s
+      timeout: 30s
+      retries: 5
+      start_period: 300s
+    command: osrm-routed --algorithm mld /data/united-kingdom-latest.osrm
+
+  # Your Streamlit App (unchanged)
+  app:
+    build: .
+    depends_on:
+      - osrm
+      - postcodes-app
+    ports:
+      - "8501:8501"
+   
+    environment:
+      POSTCODES_IO_URL : http://postcodes-app:8000
+      STREAMLIT_BROWSER_SERVER_ADDRESS: localhost
+      STREAMLIT_SERVER_ADDRESS: 0.0.0.0
+      STREAMLIT_SERVER_PORT: 8501
+      STREAMLIT_BROWSER_SERVER_HEADLESS: true
+      
+      

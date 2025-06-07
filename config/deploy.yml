@@ -1,0 +1,47 @@
+service: vrp-app
+image: mayur311002/vrp_new_app_app:arm64
+builder:
+  arch: arm64
+ssh:
+  user: root
+servers:
+  web:
+    hosts:
+      - 157.180.87.7
+    options:
+      port: 8501
+registry:
+  username: mayur311002
+  password:
+    - KAMAL_REGISTRY_PASSWORD
+env:
+  clear:
+    POSTCODES_IO_URL: http://postcodes-app:8000
+    STREAMLIT_BROWSER_SERVER_ADDRESS: localhost
+    STREAMLIT_SERVER_ADDRESS: 0.0.0.0
+    STREAMLIT_SERVER_PORT: 8501
+    STREAMLIT_BROWSER_SERVER_HEADLESS: true
+accessories:
+  osrm:
+    image: mayur311002/vrp_new_app_osrm:arm64
+    host: 157.180.87.7  # Corrected from 157.0.87.7
+    port: 5000
+  postcodes-db:
+    image: idealpostcodes/postcodes.io.db:latest  # Corrected image
+    host: 157.180.87.7  # Corrected host
+    port: 5432  # Corrected to standard PostgreSQL port
+    env:
+      clear:
+        POSTGRES_USER: postcodesio
+        POSTGRES_PASSWORD: Mayur9850573459
+        POSTGRES_DATABASE: postcodesio
+  postcodes-app:  # Renamed to match previous usage
+    image: mayur311002/vrp_new_app_postcodes_app:arm64
+    host: 157.180.87.7  # Corrected from 705.180.87.7
+    port: 8000
+    env:
+      clear:
+        POSTGRES_HOST: postcodes-db
+        POSTGRES_USER: postcodesio
+        POSTGRES_PASSWORD: Mayur9850573459
+        POSTGRES_DATABASE: postcodesio
