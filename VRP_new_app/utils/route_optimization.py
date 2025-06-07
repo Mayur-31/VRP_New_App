@@ -1,17 +1,17 @@
-# utils/route_optimization.py
-
 from ortools.constraint_solver import routing_enums_pb2, pywrapcp
 import pandas as pd
 import requests
 import folium
 import polyline
 import time
+import os
 
 SPECIAL_POSTCODES = {
     'BD112BZ': (53.758755, -1.689026),
     'WA119TY': (53.476785, -2.666254),
     'DUBLIN': (53.3498, -6.2603)
 }
+OSRM_URL = os.getenv("OSRM_URL", "http://osrm:5000")  # Use environment variable for OSRM
 
 def get_coordinates_for_map(postcode):
     if postcode in SPECIAL_POSTCODES:
@@ -114,37 +114,31 @@ def get_route(data, manager, routing, solution):
     route.append(data["postcodes"][manager.IndexToNode(index)])
     return route
 
-
 def visualize_routes(driver_routes, get_coordinates_func, jobs_df, selected_driver=None, output_html='driver_routes.html'):
     m = folium.Map(location=[54.0, -2.0], zoom_start=6)
     colors = ['red', 'blue', 'green', 'purple', 'orange', 'darkred', 'darkblue',
               'darkgreen', 'cadetblue', 'pink']
 
     for i, (driver, route) in enumerate(driver_routes.items()):
-        # Skip drivers not matching selected_driver, if specified
         if selected_driver and driver != selected_driver:
             continue
         if not route:
             continue
         color = colors[i % len(colors)]
-        # Show layer by default if filtering by driver, else hide
         fg = folium.FeatureGroup(name=driver, show=True if selected_driver else False)
         coords = [get_coordinates_func(pc) for pc in route]
 
-        # Filter jobs for this driver
         driver_jobs = jobs_df[jobs_df["DRIVER NAME"] == driver]
         if driver_jobs.empty:
             print(f"No jobs found for {driver}")
             continue
 
-        # Create HTML table for job schedule popup
         job_schedule_html = driver_jobs[[
             "DAY", "DATE", "CUSTOMER", "JOB TYPE", "COLLECTION POST CODE",
             "DELIVER POST CODE", "ON DOOR TIME", "DEPARTURE TIME", "ARRIVAL TIME",
             "RUN TIME", "LOADED MILES", "EMPTY MILES", "TOTAL MILES"
         ]].to_html(index=False, justify="center")
 
-        # Build route path
         path_coords = []
         previous_valid_coord = None
         for pc, coord in zip(route, coords):
@@ -154,7 +148,7 @@ def visualize_routes(driver_routes, get_coordinates_func, jobs_df, selected_driv
 
             if previous_valid_coord is not None:
                 try:
-                    url = f"http://osrm:5000/route/v1/driving/{previous_valid_coord[1]},{previous_valid_coord[0]};{coord[1]},{coord[0]}?overview=full"
+                    url = f"{OSRM_URL}/route/v1/driving/{previous_valid_coord[1]},{previous_valid_coord[0]};{coord[1]},{coord[0]}?overview=full"
                     response = requests.get(url)
                     data = response.json()
                     if response.status_code == 200 and data.get('code') == 'Ok':
@@ -178,14 +172,12 @@ def visualize_routes(driver_routes, get_coordinates_func, jobs_df, selected_driv
                 popup=driver
             ).add_to(fg)
 
-        # Add markers with sequence numbers and job schedule popup
         for idx, (pc, coord) in enumerate(zip(route, coords)):
             if coord is None:
                 continue
 
-            position = idx + 1  # 1-based numbering
+            position = idx + 1
             if idx == 0:
-                # Start marker with sequence number, postcode, and job schedule popup
                 start_popup_html = f"<b>1. {pc}</b><br><br>{job_schedule_html}"
                 folium.Marker(
                     location=coord,
@@ -193,7 +185,6 @@ def visualize_routes(driver_routes, get_coordinates_func, jobs_df, selected_driv
                     icon=folium.Icon(color='green', icon='play')
                 ).add_to(fg)
             elif idx == len(route) - 1:
-                # End marker with job schedule popup if different from start
                 if pc != route[0]:
                     folium.Marker(
                         location=coord,
@@ -201,7 +192,6 @@ def visualize_routes(driver_routes, get_coordinates_func, jobs_df, selected_driv
                         icon=folium.Icon(color='red', icon='stop')
                     ).add_to(fg)
             else:
-                # Intermediate markers
                 folium.Marker(
                     location=coord,
                     popup=f"{position}. {pc}",
@@ -210,7 +200,6 @@ def visualize_routes(driver_routes, get_coordinates_func, jobs_df, selected_driv
 
         fg.add_to(m)
 
-    # Add layer control
     folium.LayerControl(collapsed=False).add_to(m)
     m.save(output_html)
     print(f"Map saved as '{output_html}'")
