@@ -1,5 +1,3 @@
-# utils/mileage.py
-
 import re
 import time
 import requests
@@ -7,13 +5,14 @@ import pandas as pd
 from tqdm import tqdm
 from concurrent.futures import ThreadPoolExecutor
 from functools import lru_cache
+import os
 
-# Update your API key as necessary.
-OPENCAGE_API_KEY = 'Your_Api_key'
 POSTCODE_OVERRIDES = {
     'BD112BZ': (53.758755, -1.689026),
     'WA119TY': (53.476785, -2.666254)
 }
+POSTCODES_IO_URL = os.getenv("POSTCODES_IO_URL", "https://api.postcodes.io")
+OSRM_URL = os.getenv("OSRM_URL", "http://osrm:5000")  # Use environment variable for OSRM
 
 def is_valid_uk_postcode(postcode):
     pattern = (
@@ -28,7 +27,6 @@ def is_valid_uk_postcode(postcode):
 def clean_postcode(postcode):
     return str(postcode).strip().upper().replace(' ', '')
 
-
 @lru_cache(maxsize=1000)
 def get_coordinates_cached(postcode):
     cleaned_pc = clean_postcode(postcode)
@@ -36,32 +34,24 @@ def get_coordinates_cached(postcode):
         return POSTCODE_OVERRIDES[cleaned_pc]
 
     try:
-        response = requests.get(f"https://api.postcodes.io/postcodes/{cleaned_pc}", timeout=3)
+        response = requests.get(f"{POSTCODES_IO_URL}/postcodes/{cleaned_pc}", timeout=3)
         if response.status_code == 200:
             return (response.json()['result']['latitude'],
                     response.json()['result']['longitude'])
-    except:
-        pass
-
-    try:
-        params = {'q': postcode, 'key': OPENCAGE_API_KEY, 'limit': 1}
-        response = requests.get("https://api.opencagedata.com/geocode/v1/json",
-                              params=params, timeout=3)
-        if response.ok and response.json()['results']:
-            result = response.json()['results'][0]['geometry']
-            return (result['lat'], result['lng'])
-    except:
+        else:
+            print(f"Failed to get coordinates for {postcode} from Postcodes.io: {response.status_code}")
+            return (None, None)
+    except Exception as e:
+        print(f"Error getting coordinates for {postcode} from Postcodes.io: {e}")
         return (None, None)
-
-    return (None, None)
-
+    
 def calculate_loaded_distance(args):
     start_coord, end_coord = args
     if None in start_coord + end_coord:
         return 0.0
 
     try:
-        url = f"http://osrm:5000/route/v1/driving/{start_coord[1]},{start_coord[0]};{end_coord[1]},{end_coord[0]}?overview=false"
+        url = f"{OSRM_URL}/route/v1/driving/{start_coord[1]},{start_coord[0]};{end_coord[1]},{end_coord[0]}?overview=false"
         response = requests.get(url, timeout=5)
         if response.ok and response.json().get('code') == 'Ok':
             return response.json()['routes'][0]['distance'] / 1609.34
