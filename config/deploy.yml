@@ -1,7 +1,5 @@
 service: vrp-app
 image: mayur311002/vrp_new_app_app:arm64
-build:
-  enabled: false  # Skip local build
 ssh:
   user: root
 servers:
