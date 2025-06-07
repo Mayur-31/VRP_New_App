@@ -1,5 +1,7 @@
 service: vrp-app
 image: mayur311002/vrp_new_app_app:arm64
+builder:
+  arch: arm64
 ssh:
   user: root
 servers:
