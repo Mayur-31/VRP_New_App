@@ -1,58 +1,47 @@
-service: vrp_new_app
-registry:
-  username: # Replace with your DockerHub username
-  password: <%= ENV["KAMAL_REGISTRY_PASSWORD"] %>
+service: vrp-app
+image: mayur311002/vrp_new_app_app:arm64
+builder:
+  arch: arm64
+ssh:
+  user: root
 servers:
   web:
-    - placeholder_server_ip  # Replace with your actual server IP
+    hosts:
+      - 157.180.87.7
+    options:
+      port: 8501
+registry:
+  username: mayur311002
+  password:
+    - KAMAL_REGISTRY_PASSWORD
 env:
   clear:
-    STREAMLIT_SERVER_ADDRESS: "0.0.0.0"
-    STREAMLIT_SERVER_PORT: "8501"
-    STREAMLIT_SERVER_HEADLESS: "true"
-    STREAMLIT_BROWSER_SERVER_ADDRESS: "localhost"
-    POSTCODES_IO_URL: "http://postcodes-app:8000"
-  secret:
-    - OPENCAGE_API_KEY
-image: # Replace with your DockerHub username/vrp_new_app_app:latest
-builder:
-  context: .
-  dockerfile: Dockerfile
-  arch: amd64
-proxy:
-  ssl: false
-  app_port: 8501
+    POSTCODES_IO_URL: http://postcodes-app:8000
+    STREAMLIT_BROWSER_SERVER_ADDRESS: localhost
+    STREAMLIT_SERVER_ADDRESS: 0.0.0.0
+    STREAMLIT_SERVER_PORT: 8501
+    STREAMLIT_BROWSER_SERVER_HEADLESS: true
 accessories:
   osrm:
-    image: # Replace with your DockerHub username/vrp_new_app_osrm:latest
-    host: placeholder_server_ip
-    cmd: osrm-routed --algorithm mld /data/united-kingdom-latest.osrm
-    volumes:
-      - ./osrm:/data
+    image: mayur311002/vrp_new_app_osrm:arm64
+    host: 157.180.87.7  # Corrected from 157.0.87.7
+    port: 5000
   postcodes-db:
-    image: idealpostcodes/postcodes.io.db
-    host: placeholder_server_ip
+    image: idealpostcodes/postcodes.io.db:latest  # Corrected image
+    host: 157.180.87.7  # Corrected host
+    port: 5432  # Corrected to standard PostgreSQL port
     env:
       clear:
         POSTGRES_USER: postcodesio
-        POSTGRES_DB: postcodesio
-      secret:
-        - POSTGRES_PASSWORD
-    volumes:
-      - postcodes-data:/var/lib/postgresql/data
-  postcodes-app:
-    build:
-      context: ./postcodes-app
-      dockerfile: Dockerfile
-    host: placeholder_server_ip
+        POSTGRES_PASSWORD: Mayur9850573459
+        POSTGRES_DATABASE: postcodesio
+  postcodes-app:  # Renamed to match previous usage
+    image: mayur311002/vrp_new_app_postcodes_app:arm64
+    host: 157.180.87.7  # Corrected from 705.180.87.7
+    port: 8000
     env:
       clear:
-        DATABASE_URL: "postgresql://postcodesio:<%= ENV["POSTGRES_PASSWORD"] %>@postcodes-db:5432/postcodesio"
-        LOG_LEVEL: trace
-        NODE_ENV: production
-        PORT: 8000
-    depends_on:
-      - postcodes-db
-
-volumes:
-  postcodes-data:
+        POSTGRES_HOST: postcodes-db
+        POSTGRES_USER: postcodesio
+        POSTGRES_PASSWORD: Mayur9850573459
+        POSTGRES_DATABASE: postcodesio
