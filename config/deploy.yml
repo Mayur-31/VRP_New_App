@@ -1,15 +1,11 @@
 service: vrp-app
 image: mayur311002/vrp_new_app_app:arm64
-builder:
-  arch: arm64
+build:
+  enabled: false  # Skip local build
 ssh:
   user: root
 servers:
-  web:
-    hosts:
-      - 157.180.87.7
-    options:
-      port: 8501
+  - 157.180.87.7
 registry:
   username: mayur311002
   password:
@@ -24,20 +20,20 @@ env:
 accessories:
   osrm:
     image: mayur311002/vrp_new_app_osrm:arm64
-    host: 157.180.87.7  # Corrected from 157.0.87.7
+    host: 157.180.87.7
     port: 5000
   postcodes-db:
-    image: idealpostcodes/postcodes.io.db:latest  # Corrected image
-    host: 157.180.87.7  # Corrected host
-    port: 5432  # Corrected to standard PostgreSQL port
+    image: idealpostcodes/postcodes.io.db:latest
+    host: 157.180.87.7
+    port: 5432
     env:
       clear:
         POSTGRES_USER: postcodesio
         POSTGRES_PASSWORD: Mayur9850573459
         POSTGRES_DATABASE: postcodesio
-  postcodes-app:  # Renamed to match previous usage
+  postcodes-app:
     image: mayur311002/vrp_new_app_postcodes_app:arm64
-    host: 157.180.87.7  # Corrected from 705.180.87.7
+    host: 157.180.87.7
     port: 8000
     env:
       clear:
