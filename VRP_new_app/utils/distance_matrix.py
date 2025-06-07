@@ -1,16 +1,16 @@
-# utils/distance_matrix.py
-
 import numpy as np
 import pandas as pd
 import time
 import requests
 from geopy.geocoders import Nominatim
 from geopy.extra.rate_limiter import RateLimiter
+import os
 
 PREDEFINED_COORDS = {
     'BD112BZ': (53.758755, -1.689026),
     'WA119TY': (53.476785, -2.666254)
 }
+OSRM_URL = os.getenv("OSRM_URL", "http://osrm:5000")  # Use environment variable for OSRM
 
 def geocode_postcodes(postcodes):
     """
@@ -60,7 +60,7 @@ def create_osrm_distance_matrix(postcode_lookup, batch_size=50):
             sources = ';'.join(map(str, range(len(batches[batch_i]))))
             destinations = ';'.join(map(str, range(len(batches[batch_i]), len(indices))))
         coords_str = ";".join([f"{lons[k]},{lats[k]}" for k in indices])
-        url = f"http://osrm:5000/table/v1/driving/{coords_str}?annotations=distance&sources={sources}&destinations={destinations}"
+        url = f"{OSRM_URL}/table/v1/driving/{coords_str}?annotations=distance&sources={sources}&destinations={destinations}"
         response = requests.get(url, timeout=10)
         response.raise_for_status()
         distances_meters = response.json()['distances']
