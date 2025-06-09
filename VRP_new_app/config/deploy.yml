@@ -4,9 +4,12 @@ builder:
   arch: arm64
 ssh:
   user: root
-  key: ~/.ssh/vrp_vps_key
 servers:
-  - 157.180.87.7
+  web:
+    hosts:
+      - 157.180.87.7
+    options:
+      port: 8501
 registry:
   username: mayur311002
   password:
@@ -24,7 +27,7 @@ accessories:
     host: 157.180.87.7
     port: 5000
   postcodes-db:
-    image: idealpostcodes/postcodes.io.db:latest
+    image: postgres:16
     host: 157.180.87.7
     port: 5432
     env:
@@ -40,3 +43,5 @@ accessories:
       clear:
         POSTGRES_HOST: postcodes-db
         POSTGRES_USER: postcodesio
+        POSTGRES_PASSWORD: Mayur9850573459
+        POSTGRES_DATABASE: postcodesio
