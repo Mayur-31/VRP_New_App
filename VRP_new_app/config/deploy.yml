@@ -5,11 +5,7 @@ builder:
 ssh:
   user: root
 servers:
-  web:
-    hosts:
-      - 157.180.87.7
-    options:
-      port: 8501
+  - 157.180.87.7
 registry:
   username: mayur311002
   password:
@@ -27,7 +23,7 @@ accessories:
     host: 157.180.87.7
     port: 5000
   postcodes-db:
-    image: postgres:16
+    image: idealpostcodes/postcodes.io.db:latest
     host: 157.180.87.7
     port: 5432
     env:
