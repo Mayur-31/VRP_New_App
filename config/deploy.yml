@@ -40,5 +40,3 @@ accessories:
         POSTGRES_USER: postcodesio
         POSTGRES_PASSWORD: Mayur9850573459
         POSTGRES_DATABASE: postcodesio
-builder:
-  multiarch: false
