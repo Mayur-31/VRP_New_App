@@ -28,8 +28,9 @@ accessories:
     env:
       clear:
         POSTGRES_USER: postcodesio
-        POSTGRES_PASSWORD: Mayur9850573459
         POSTGRES_DATABASE: postcodesio
+      secret:
+        - POSTGRES_PASSWORD
   postcodes-app:
     image: mayur311002/vrp_new_app_postcodes_app:arm64
     host: 157.180.87.7
@@ -38,5 +39,9 @@ accessories:
       clear:
         POSTGRES_HOST: postcodes-db
         POSTGRES_USER: postcodesio
-        POSTGRES_PASSWORD: Mayur9850573459
         POSTGRES_DATABASE: postcodesio
+      secret:
+        - POSTGRES_PASSWORD
+builder:
+  arch: arm64
+
