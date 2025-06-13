@@ -1,10 +1,6 @@
-# VRP_new_app/config/deploy.yml
-git:
-  url: https://github.com/Mayur-31/VRP_New_App.git
-  branch: main
-
 service: vrp-app
 image: mayur311002/vrp_new_app_app:arm64
+
 builder:
   arch: arm64
 
