@@ -1,24 +1,14 @@
-# VRP_new_app/config/deploy.yml
-git:
-  url: https://github.com/Mayur-31/VRP_New_App.git
-  branch: main
-
+# Kamal 2.6.1 configuration for deploying vrp-app and accessories
 service: vrp-app
 image: mayur311002/vrp_new_app_app:arm64
-builder:
-  arch: arm64
-
-ssh:
-  user: root
-
 servers:
   - 157.180.87.7
-
 registry:
   username: mayur311002
   password:
     - KAMAL_REGISTRY_PASSWORD
-
+ssh:
+  user: root
 env:
   clear:
     POSTCODES_IO_URL: http://postcodes-app:8000
@@ -26,13 +16,11 @@ env:
     STREAMLIT_SERVER_ADDRESS: 0.0.0.0
     STREAMLIT_SERVER_PORT: 8501
     STREAMLIT_BROWSER_SERVER_HEADLESS: true
-
 accessories:
   osrm:
     image: mayur311002/vrp_new_app_osrm:arm64
     host: 157.180.87.7
     port: 5000
-
   postcodes-db:
     image: idealpostcodes/postcodes.io.db:latest
     host: 157.180.87.7
@@ -42,7 +30,6 @@ accessories:
         POSTGRES_USER: postcodesio
         POSTGRES_PASSWORD: Mayur9850573459
         POSTGRES_DATABASE: postcodesio
-
   postcodes-app:
     image: mayur311002/vrp_new_app_postcodes_app:arm64
     host: 157.180.87.7
@@ -53,3 +40,5 @@ accessories:
         POSTGRES_USER: postcodesio
         POSTGRES_PASSWORD: Mayur9850573459
         POSTGRES_DATABASE: postcodesio
+builder:
+  multiarch: false
