@@ -1,9 +1,9 @@
 #VRP_new_app/config/deploy.yml
 service: vrp-app
 image: mayur311002/vrp_new_app_app
+port: 8501  # Add this top-level port declaration
 servers:
-  - host: 157.180.87.7
-    port: 8501  # Add port directly to the server definition
+  - 157.180.87.7  # Simple list of IPs, no objects
 registry:
   username: mayur311002
   password:
