@@ -1,8 +1,10 @@
-# Kamal 2.3.0 configuration for deploying vrp-app and accessories
 service: vrp-app
 image: mayur311002/vrp_new_app_app
 servers:
   - 157.180.87.7
+proxy:
+  port: 8501
+  ssl: false
 registry:
   username: mayur311002
   password:
@@ -16,17 +18,15 @@ env:
     STREAMLIT_SERVER_ADDRESS: 0.0.0.0
     STREAMLIT_SERVER_PORT: 8501
     STREAMLIT_BROWSER_SERVER_HEADLESS: true
-proxy:
-  app_port: 8501  # Tell kamal-proxy to target port 8501 for health checks
 accessories:
   osrm:
     image: mayur311002/vrp_new_app_osrm:arm64
     host: 157.180.87.7
-    port: 5000
+    port: "5000:5000"
   postcodes-db:
     image: idealpostcodes/postcodes.io.db:latest
     host: 157.180.87.7
-    port: 5432
+    port: "5432:5432"
     env:
       clear:
         POSTGRES_USER: postcodesio
@@ -36,7 +36,7 @@ accessories:
   postcodes-app:
     image: mayur311002/vrp_new_app_postcodes_app:arm64
     host: 157.180.87.7
-    port: 8000
+    port: "8000:8000"
     env:
       clear:
         POSTGRES_HOST: postcodes-db
@@ -44,7 +44,5 @@ accessories:
         POSTGRES_DATABASE: postcodesio
       secret:
         - POSTGRES_PASSWORD
-
 builder:
   arch: arm64
-

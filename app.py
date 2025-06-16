@@ -8,6 +8,7 @@ import polyline
 from folium.plugins import PolyLineTextPath
 from utils import mileage, distance_matrix, route_optimization
 import os
+STREAMLIT_PORT = os.getenv("STREAMLIT_SERVER_PORT", "8501")
 
 st.set_page_config(page_title="🚚 Smart Vehicle Routing Optimizer", layout="wide", page_icon=":truck:")
 OSRM_URL = os.getenv("OSRM_URL", "http://osrm:5000")  # Use environment variable for OSRM
@@ -30,7 +31,7 @@ def get_distance_matrix(unique_pcs):
 
 def main():
     st.title("🚚 Smart Vehicle Routing Optimizer")
-    st.markdown("### Deliver faster, route smarter")
+    st.markdown(f"### Running on port {STREAMLIT_PORT}")
 
     uploaded_file = st.file_uploader("**🚚 Upload CSV File**", type=["csv"])
     if not uploaded_file:
