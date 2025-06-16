@@ -15,8 +15,8 @@ env:
     STREAMLIT_SERVER_ADDRESS: 0.0.0.0
     STREAMLIT_SERVER_PORT: 8501
     STREAMLIT_BROWSER_SERVER_HEADLESS: true
-    # Add this environment variable for container port
-    KAMAL_CONTAINER_PORT: 8501
+    KAMAL_HEALTH_CHECK_PATH: "/_stcore/health"
+    KAMAL_CONTAINER_PORT: "8501"
 accessories:
   osrm:
     image: mayur311002/vrp_new_app_osrm:arm64
