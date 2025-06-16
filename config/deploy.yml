@@ -1,6 +1,6 @@
-# Kamal 2.6.1 configuration for deploying vrp-app and accessories
+#VRP_new_app/config/deploy.yml
 service: vrp-app
-image: mayur311002/vrp_new_app_app # Changed from mayur311002/vrp_new_app_app:arm64
+image: mayur311002/vrp_new_app_app:latest
 servers:
   - 157.180.87.7
 registry:
@@ -12,19 +12,16 @@ ssh:
 env:
   clear:
     POSTCODES_IO_URL: http://postcodes-app:8000
-    STREAMLIT_BROWSER_SERVER_ADDRESS: localhost
     STREAMLIT_SERVER_ADDRESS: 0.0.0.0
-    STREAMLIT_SERVER_PORT: 8501
-    STREAMLIT_BROWSER_SERVER_HEADLESS: true
 accessories:
   osrm:
-    image: mayur311002/vrp_new_app_osrm:arm64
+    image: mayur311002/vrp_new_app_osrm:latest
     host: 157.180.87.7
-    port: 5000
+    port: "5000:5000"
   postcodes-db:
     image: idealpostcodes/postcodes.io.db:latest
     host: 157.180.87.7
-    port: 5432
+    port: "5432:5432"
     env:
       clear:
         POSTGRES_USER: postcodesio
@@ -32,9 +29,9 @@ accessories:
       secret:
         - POSTGRES_PASSWORD
   postcodes-app:
-    image: mayur311002/vrp_new_app_postcodes_app:arm64
+    image: mayur311002/vrp_new_app_postcodes_app:latest
     host: 157.180.87.7
-    port: 8000
+    port: "8000:8000"
     env:
       clear:
         POSTGRES_HOST: postcodes-db
@@ -42,5 +39,6 @@ accessories:
         POSTGRES_DATABASE: postcodesio
       secret:
         - POSTGRES_PASSWORD
+# Add this builder section with arch
 builder:
-  arch: arm64
+  arch: arm64  # Must match your server architecture
