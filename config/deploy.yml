@@ -2,7 +2,8 @@
 service: vrp-app
 image: mayur311002/vrp_new_app_app
 servers:
-  - 157.180.87.7
+  - host: 157.180.87.7
+    port: 8501  # Add port directly to the server definition
 registry:
   username: mayur311002
   password:
@@ -17,12 +18,6 @@ env:
     STREAMLIT_BROWSER_GATHER_USAGE_STATS: "false"
     KAMAL_HEALTH_CHECK_PATH: "/_stcore/health"
     KAMAL_CONTAINER_PORT: "8501"
-# Add this roles section to define the web role and port
-roles:
-  web:
-    port: 8501  # Explicitly define the port here
-    hosts:
-      - 157.180.87.7
 accessories:
   osrm:
     image: mayur311002/vrp_new_app_osrm:arm64
