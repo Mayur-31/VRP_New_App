@@ -2,9 +2,6 @@ service: vrp-app
 image: mayur311002/vrp_new_app_app
 servers:
   - 157.180.87.7
-proxy:
-  port: 8501
-  ssl: false
 registry:
   username: mayur311002
   password:
@@ -18,6 +15,8 @@ env:
     STREAMLIT_SERVER_ADDRESS: 0.0.0.0
     STREAMLIT_SERVER_PORT: 8501
     STREAMLIT_BROWSER_SERVER_HEADLESS: true
+    # Add this environment variable for container port
+    KAMAL_CONTAINER_PORT: 8501
 accessories:
   osrm:
     image: mayur311002/vrp_new_app_osrm:arm64
