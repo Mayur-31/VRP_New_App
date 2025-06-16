@@ -1,6 +1,6 @@
 # Kamal 2.3.0 configuration for deploying vrp-app and accessories
 service: vrp-app
-image: mayur311002/vrp_new_app_app:arm64
+image: mayur311002/vrp_new_app_app
 servers:
   - 157.180.87.7
 registry:
@@ -44,7 +44,7 @@ accessories:
         POSTGRES_DATABASE: postcodesio
       secret:
         - POSTGRES_PASSWORD
+
 builder:
   arch: arm64
-
 
