@@ -1,6 +1,6 @@
 #VRP_new_app/config/deploy.yml
 service: vrp-app
-image: mayur311002/vrp_new_app_app:latest
+image: mayur311002/vrp_new_app_app
 servers:
   - 157.180.87.7
 registry:
