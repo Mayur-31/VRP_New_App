@@ -1,5 +1,6 @@
 service: vrp-app
-image: mayur311002/vrp_new_app_app  # Remove tag from here
+# Use architecture in the image name but without colon
+image: mayur311002/vrp_new_app_app-arm64
 servers:
   - 157.180.87.7
 registry:
@@ -8,7 +9,6 @@ registry:
     - KAMAL_REGISTRY_PASSWORD
 ssh:
   user: root
-tag: arm64  # Define tag separately
 env:
   clear:
     POSTCODES_IO_URL: http://postcodes-app:8000
