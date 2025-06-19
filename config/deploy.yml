@@ -18,18 +18,18 @@ env:
     STREAMLIT_BROWSER_SERVER_HEADLESS: true
     STREAMLIT_SERVER_ENABLE_CORS: false
 
-# Health check configuration (old format)
-healthcheck:
-  path: /_stcore/health
-  port: 8501
+# Health check configuration (Kamal 2.3.0 syntax)
+traefik:
+  healthcheck:
+    path: /_stcore/health
+    port: 8501
+    interval: 10s
+    timeout: 5s
+    retries: 3
+    wait: 60s  # Increased timeout
 
-# Add network connections through labels
-labels:
-  service: vrp-app
-  network: vrp-network
-
-# Traefik configuration through options
-options:
+# Port mapping and network configuration
+args:
   publish: "8501:8501"
   network: "kamal,vrp-network"
 
@@ -38,10 +38,10 @@ accessories:
     image: mayur311002/vrp_new_app_osrm:latest-arm64
     host: 157.180.87.7
     port: "5000:5000"
-    files:
+    volumes:
       - /data/osrm:/data
     cmd: osrm-routed --algorithm mld /data/united-kingdom-latest.osrm
-    options:
+    args:
       network: vrp-network
 
   postcodes-db:
@@ -54,9 +54,9 @@ accessories:
         POSTGRES_DATABASE: postcodesio
       secret:
         - POSTGRES_PASSWORD
-    files:
+    volumes:
       - /data/postgres:/var/lib/postgresql/data
-    options:
+    args:
       network: vrp-network
 
   postcodes-app:
@@ -68,7 +68,7 @@ accessories:
         DATABASE_URL: postgresql://postcodesio:${POSTGRES_PASSWORD}@postcodes-db:5432/postcodesio
       secret:
         - POSTGRES_PASSWORD
-    options:
+    args:
       network: vrp-network
 
 builder:
