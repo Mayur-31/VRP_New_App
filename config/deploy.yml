@@ -1,5 +1,5 @@
 service: vrp-app
-image: mayur311002/vrp_new_app_app
+image: mayur311002/vrp_new_app_app:latest-arm64
 servers:
   - 157.180.87.7
 registry:
@@ -8,9 +8,6 @@ registry:
     - KAMAL_REGISTRY_PASSWORD
 ssh:
   user: root
-  keys:
-    - ~/.ssh/kamal_key  # Updated to match your SSH config
-tag: latest-arm64
 env:
   clear:
     POSTCODES_IO_URL: http://postcodes-app:8000
@@ -27,7 +24,6 @@ accessories:
     volumes:
       - /data/osrm:/data
     cmd: osrm-routed --algorithm mld /data/united-kingdom-latest.osrm
-
   postcodes-db:
     image: idealpostcodes/postcodes.io.db:latest
     host: 157.180.87.7
@@ -41,7 +37,6 @@ accessories:
     volumes:
       - /data/postgres:/var/lib/postgresql/data
     network: vrp-network
-
   postcodes-app:
     image: mayur311002/vrp_new_app_postcodes_app:latest-arm64
     host: 157.180.87.7
@@ -52,6 +47,5 @@ accessories:
       secret:
         - POSTGRES_PASSWORD
     network: vrp-network
-
 builder:
   arch: arm64
