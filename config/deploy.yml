@@ -1,4 +1,3 @@
-# VRP_new_app/config/deploy.yml
 service: vrp-app
 image: mayur311002/vrp_new_app_app-arm64
 servers:
@@ -18,22 +17,17 @@ env:
     STREAMLIT_BROWSER_SERVER_HEADLESS: true
     STREAMLIT_SERVER_ENABLE_CORS: false
 
-# Correct configuration for Kamal 2.3.0
-builder:
-  arch: arm64
+# Use labels for health check configuration
+labels:
+  traefik.http.services.vrp-app.loadbalancer.healthcheck.path: /_stcore/health
+  traefik.http.services.vrp-app.loadbalancer.healthcheck.port: "8501"
+  traefik.http.services.vrp-app.loadbalancer.healthcheck.interval: "10s"
+  traefik.http.services.vrp-app.loadbalancer.healthcheck.timeout: "5s"
 
-# Docker run arguments
+# Docker options
 args:
   publish: "8501:8501"
   network: "kamal,vrp-network"
-
-# Health check configuration
-healthcheck:
-  path: /_stcore/health
-  port: 8501
-  interval: 10s
-  timeout: 5s
-  retries: 3
 
 accessories:
   osrm:
@@ -72,3 +66,6 @@ accessories:
         - POSTGRES_PASSWORD
     args:
       network: "vrp-network"
+
+builder:
+  arch: arm64
