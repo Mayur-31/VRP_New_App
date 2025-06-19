@@ -1,5 +1,5 @@
 service: vrp-app
-image: mayur311002/vrp_new_app_app  # Remove tag from here
+image: mayur311002/vrp_new_app_app:arm64  # Use architecture-specific tag here
 servers:
   - 157.180.87.7
 registry:
@@ -49,5 +49,3 @@ accessories:
     network: vrp-network
 builder:
   arch: arm64
-version:
-  tag: "arm64"  # Add version tagging
