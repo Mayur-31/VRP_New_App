@@ -16,45 +16,33 @@ env:
     STREAMLIT_SERVER_ADDRESS: 0.0.0.0
     STREAMLIT_SERVER_PORT: 8501
     STREAMLIT_BROWSER_SERVER_HEADLESS: true
-    STREAMLIT_SERVER_ENABLE_CORS: false  # Added for security
+    STREAMLIT_SERVER_ENABLE_CORS: false
 
-# Health check configuration for Streamlit
+# Health check configuration (old format)
 healthcheck:
-  path: /_stcore/health  # Streamlit's built-in health endpoint
+  path: /_stcore/health
   port: 8501
-  interval: 10s
-  timeout: 5s
-  retries: 3
 
-# Network configuration
-networks:
-  - kamal
-  - vrp-network  # Connect to accessory network
+# Add network connections through labels
+labels:
+  service: vrp-app
+  network: vrp-network
 
-# Traefik configuration for proper routing
-traefik:
-  args:
-    wait: 60s  # Increased timeout for health checks
-    publish:
-      - "8501:8501"
-  labels:
-    traefik.http.routers.vrp-app.rule: PathPrefix(`/`)
-    traefik.http.services.vrp-app.loadbalancer.healthcheck.path: /_stcore/health
+# Traefik configuration through options
+options:
+  publish: "8501:8501"
+  network: "kamal,vrp-network"
 
 accessories:
   osrm:
     image: mayur311002/vrp_new_app_osrm:latest-arm64
     host: 157.180.87.7
     port: "5000:5000"
-    network: vrp-network
-    volumes:
+    files:
       - /data/osrm:/data
     cmd: osrm-routed --algorithm mld /data/united-kingdom-latest.osrm
-    healthcheck:  # Added health check for OSRM
-      test: ["CMD", "curl", "-f", "http://localhost:5000/route/v1/driving/13.388860,52.517037;13.397634,52.529407?overview=false"]
-      interval: 30s
-      timeout: 5s
-      retries: 3
+    options:
+      network: vrp-network
 
   postcodes-db:
     image: idealpostcodes/postcodes.io.db:latest
@@ -66,35 +54,22 @@ accessories:
         POSTGRES_DATABASE: postcodesio
       secret:
         - POSTGRES_PASSWORD
-    volumes:
+    files:
       - /data/postgres:/var/lib/postgresql/data
-    network: vrp-network
-    healthcheck:  # Added health check for Postgres
-      test: ["CMD-SHELL", "pg_isready -U postcodesio"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+    options:
+      network: vrp-network
 
   postcodes-app:
     image: mayur311002/vrp_new_app_postcodes_app:latest-arm64
     host: 157.180.87.7
     port: "8000:8000"
-    network: vrp-network
     env:
       clear:
         DATABASE_URL: postgresql://postcodesio:${POSTGRES_PASSWORD}@postcodes-db:5432/postcodesio
       secret:
         - POSTGRES_PASSWORD
-    healthcheck:  # Added health check for Postcodes API
-      test: ["CMD", "curl", "-f", "http://localhost:8000/ping"]
-      interval: 15s
-      timeout: 5s
-      retries: 3
+    options:
+      network: vrp-network
 
 builder:
   arch: arm64
-
-# Optional: Add resource constraints
-container:
-  memory: 2g
-  cpus: 1.5
