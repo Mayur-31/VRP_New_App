@@ -1,4 +1,3 @@
-# VRP_new_app/config/deploy.yml
 service: vrp-app
 image: mayur311002/vrp_new_app_app-arm64
 servers:
@@ -18,20 +17,27 @@ env:
     STREAMLIT_BROWSER_SERVER_HEADLESS: true
     STREAMLIT_SERVER_ENABLE_CORS: false
 
-# Health check configuration (Kamal 2.3.0 syntax)
-traefik:
-  healthcheck:
-    path: /_stcore/health
-    port: 8501
-    interval: 10s
-    timeout: 5s
-    retries: 3
-    wait: 60s  # Increased timeout
+# Health check configuration (correct format for Kamal 2.3.0)
+healthcheck:
+  path: /_stcore/health
+  port: 8501
+  interval: 10s
+  timeout: 5s
+  retries: 3
 
-# Port mapping and network configuration
-args:
+# Traefik configuration (correct format)
+traefik:
+  args:
+    wait: 60s
+
+# Port mapping
+options:
   publish: "8501:8501"
-  network: "kamal,vrp-network"
+
+# Network configuration
+networks:
+  - kamal
+  - vrp-network
 
 accessories:
   osrm:
@@ -41,8 +47,8 @@ accessories:
     volumes:
       - /data/osrm:/data
     cmd: osrm-routed --algorithm mld /data/united-kingdom-latest.osrm
-    args:
-      network: vrp-network
+    networks:
+      - vrp-network
 
   postcodes-db:
     image: idealpostcodes/postcodes.io.db:latest
@@ -56,8 +62,8 @@ accessories:
         - POSTGRES_PASSWORD
     volumes:
       - /data/postgres:/var/lib/postgresql/data
-    args:
-      network: vrp-network
+    networks:
+      - vrp-network
 
   postcodes-app:
     image: mayur311002/vrp_new_app_postcodes_app:latest-arm64
@@ -68,8 +74,8 @@ accessories:
         DATABASE_URL: postgresql://postcodesio:${POSTGRES_PASSWORD}@postcodes-db:5432/postcodesio
       secret:
         - POSTGRES_PASSWORD
-    args:
-      network: vrp-network
+    networks:
+      - vrp-network
 
 builder:
   arch: arm64
