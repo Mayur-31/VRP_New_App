@@ -21,6 +21,7 @@ Dockerfile.local
 
 # Tests and subprojects
 tests/
-postcodes-app/
+postcodes-app/*
+!postcodes-app/Dockerfile
 
 .env
