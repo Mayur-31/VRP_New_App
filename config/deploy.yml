@@ -1,5 +1,5 @@
 service: vrp-app
-image: mayur311002/vrp_new_app_app:arm64  # Use architecture-specific tag here
+image: mayur311002/vrp_new_app_app:latest-arm64
 servers:
   - 157.180.87.7
 registry:
