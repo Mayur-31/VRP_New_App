@@ -9,8 +9,12 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
+# Add health check script
+COPY config/healthcheck.sh /healthcheck.sh
+RUN chmod +x /healthcheck.sh
+
 # Add health check
 HEALTHCHECK --interval=5s --timeout=3s \
-  CMD curl -f http://localhost:8501/_stcore/health || exit 1
+  CMD /healthcheck.sh || exit 1
 
 CMD ["streamlit", "run", "app.py", "--server.port=8501", "--server.address=0.0.0.0"]
