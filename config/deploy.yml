@@ -1,7 +1,7 @@
 service: vrp-app
 image: mayur311002/vrp_new_app-arm64:latest
 servers:
-  - 157.180.207.7
+  - 157.180.87.7
 registry:
   username: mayur311002
   password:
@@ -28,14 +28,14 @@ labels:
 accessories:
   osrm:
     image: mayur311002/vrp_new_app_osrm:latest-arm64
-    host: 157.180.207.7
+    host: 157.180.87.7
     port: "5000:5000"
     volumes:
       - /data/osrm:/data
     cmd: "/usr/local/bin/osrm-routed --algo=mld /data/united-kingdom-latest.osrm"
   postcodes-db:
     image: idealpostcodes/postcodes.io.db:latest
-    host: 157.180.207.7
+    host: 157.180.87.7
     port: "5432:5432"
     env:
       clear:
@@ -47,7 +47,7 @@ accessories:
       - /data/postgres:/var/lib/postgresql/data
   postcodes-app:
     image: mayur311002/vrp_new_app_postcodes_app:latest-arm64
-    host: 157.180.207.7
+    host: 157.180.87.7
     port: "8000:8000"
     env:
       clear:
