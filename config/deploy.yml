@@ -24,12 +24,11 @@ labels:
   traefik.http.services.vrp-app.loadbalancer.healthcheck.interval: "10s"
   traefik.http.services.vrp-app.loadbalancer.healthcheck.timeout: "5s"
 
-# PORT MAPPING
-publish:
-  - "8501:8501"
+# PORT MAPPING (correct format for Kamal 2.3.0)
+publish_args: "8501:8501"
 
-# NETWORK CONFIGURATION
-network: "kamal,vrp-network"
+# NETWORK CONFIGURATION (correct format)
+network_args: "kamal,vrp-network"
 
 accessories:
   osrm:
@@ -39,7 +38,7 @@ accessories:
     volumes:
       - /data/osrm:/data
     cmd: osrm-routed --algorithm mld /data/united-kingdom-latest.osrm
-    network: "vrp-network"
+    network_args: "vrp-network"
 
   postcodes-db:
     image: idealpostcodes/postcodes.io.db:latest
@@ -53,7 +52,7 @@ accessories:
         - POSTGRES_PASSWORD
     volumes:
       - /data/postgres:/var/lib/postgresql/data
-    network: "vrp-network"
+    network_args: "vrp-network"
 
   postcodes-app:
     image: mayur311002/vrp_new_app_postcodes_app:latest-arm64
@@ -64,7 +63,7 @@ accessories:
         DATABASE_URL: postgresql://postcodesio:${POSTGRES_PASSWORD}@postcodes-db:5432/postcodesio
       secret:
         - POSTGRES_PASSWORD
-    network: "vrp-network"
+    network_args: "vrp-network"
 
 builder:
   arch: arm64
