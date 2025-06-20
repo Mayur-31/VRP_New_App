@@ -24,8 +24,7 @@ accessories:
     volumes:
       - /data/osrm:/data
     cmd: osrm-routed --algorithm mld /data/united-kingdom-latest.osrm
-    options:  # Converted to hash format
-      network: kamal
+    options: 
       name: osrm
       restart: unless-stopped
       "log-opt": max-size=10m
@@ -41,24 +40,22 @@ accessories:
         - POSTGRES_PASSWORD
     volumes:
       - /data/postgres:/var/lib/postgresql/data
-    options:  # Converted to hash format
-      network: kamal
+    options:
       name: postcodes-db
       restart: unless-stopped
 
   postcodes-app:
     image: mayur311002/vrp_new_app_postcodes_app:latest-arm64
     host: 157.180.87.7
+    port: "8000:8000"
     env:
       clear:
         DATABASE_URL: postgresql://postcodesio:${POSTGRES_PASSWORD}@postcodes-db:5432/postcodesio
       secret:
         - POSTGRES_PASSWORD
-    options:  # Converted to hash format
-      network: kamal
+    options:
       name: postcodes-app
       restart: unless-stopped
-    port: "8000:8000"  # Added port mapping
     cmd: >
       bash -c 'wait-for-it postcodes-db:5432 --timeout=120 -- 
       ./entrypoint.sh'
