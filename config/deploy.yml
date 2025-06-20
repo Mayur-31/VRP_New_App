@@ -17,10 +17,15 @@ env:
     STREAMLIT_BROWSER_SERVER_HEADLESS: true
     STREAMLIT_SERVER_ENABLE_CORS: false
 
-# Docker runtime arguments
-args:
+# Docker options using the correct key
+options:
+  # Port mapping
   publish: "8501:8501"
+  
+  # Network configuration
   network: "kamal,vrp-network"
+  
+  # Health check
   health-cmd: "curl -f http://localhost:8501/_stcore/health || exit 1"
   health-interval: "10s"
   health-timeout: "5s"
@@ -34,7 +39,7 @@ accessories:
     volumes:
       - /data/osrm:/data
     cmd: osrm-routed --algorithm mld /data/united-kingdom-latest.osrm
-    args:
+    options:
       network: "vrp-network"
 
   postcodes-db:
@@ -49,7 +54,7 @@ accessories:
         - POSTGRES_PASSWORD
     volumes:
       - /data/postgres:/var/lib/postgresql/data
-    args:
+    options:
       network: "vrp-network"
 
   postcodes-app:
@@ -61,7 +66,7 @@ accessories:
         DATABASE_URL: postgresql://postcodesio:${POSTGRES_PASSWORD}@postcodes-db:5432/postcodesio
       secret:
         - POSTGRES_PASSWORD
-    args:
+    options:
       network: "vrp-network"
 
 builder:
