@@ -17,14 +17,14 @@ env:
     STREAMLIT_BROWSER_SERVER_HEADLESS: true
     STREAMLIT_SERVER_ENABLE_CORS: false
 labels:
-  - "traefik.enable=true"
-  - "traefik.http.routers.vrp-app.rule=PathPrefix(`/_stcore`)"
-  - "traefik.http.routers.vrp-app.entrypoints=web"
-  - "traefik.http.services.vrp-app.loadbalancer.server.port=8501"
-  - "traefik.http.services.vrp-app.loadbalancer.healthcheck.path=/_stcore/health"
-  - "traefik.http.services.vrp-app.loadbalancer.healthcheck.interval=10s"
-  - "traefik.http.services.vrp-app.loadbalancer.healthcheck.timeout=5s"
-  - "traefik.http.services.vrp-app.loadbalancer.healthcheck.retries=3"
+  traefik.enable: true
+  traefik.http.routers.vrp-app.rule: PathPrefix(`/_stcore`)
+  traefik.http.routers.vrp-app.entrypoints: web
+  traefik.http.services.vrp-app.loadbalancer.server.port: 8501
+  traefik.http.services.vrp-app.loadbalancer.healthcheck.path: /_stcore/health
+  traefik.http.services.vrp-app.loadbalancer.healthcheck.interval: 10s
+  traefik.http.services.vrp-app.loadbalancer.healthcheck.timeout: 5s
+  traefik.http.services.vrp-app.loadbalancer.healthcheck.retries: 3
 accessories:
   osrm:
     image: mayur311002/vrp_new_app_osrm:latest-arm64
@@ -33,7 +33,10 @@ accessories:
       - "5000:5000"
     volumes:
       - /data/osrm:/data
-    cmd: ["/usr/local/bin/osrm-routed", "--algo", "mld", "/data/united-kingdom-latest.osrm"]
+    cmd:
+      - /usr/local/bin/osrm-routed
+      - --algo=mld
+      - /data/united-kingdom-latest.osrm
   postcodes-db:
     image: idealpostcodes/postcodes.io.db:latest
     host: 157.180.207.7
@@ -57,5 +60,7 @@ accessories:
         DATABASE_URL: postgresql://postcodesio:${POSTGRES_PASSWORD}@postcodes-db:5432/postcodes
       secret:
         - POSTGRES_PASSWORD
+    volumes:
+      - /data/postgres:/var/lib/postgresql/data
 builder:
   arch: arm64
