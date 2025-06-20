@@ -2,12 +2,15 @@ FROM python:3.9-slim
 
 WORKDIR /app
 
-# Install build tools and wait-for-it
-RUN apt-get update && apt-get install -y build-essential wait-for-it
+# Install build tools, wait-for-it, and curl for health checks
+RUN apt-get update && apt-get install -y build-essential wait-for-it curl
 
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
-
 COPY . .
+
+# Add health check
+HEALTHCHECK --interval=5s --timeout=3s \
+  CMD curl -f http://localhost:8501/_stcore/health || exit 1
 
 CMD ["streamlit", "run", "app.py", "--server.port=8501", "--server.address=0.0.0.0"]
