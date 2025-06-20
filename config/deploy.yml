@@ -25,12 +25,6 @@ accessories:
     volumes:
       - /data/osrm:/data
     cmd: osrm-routed --algorithm mld /data/united-kingdom-latest.osrm
-    # Add health check
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5000/route/v1/driving/-0.085,51.516;-0.09,51.51"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
 
   postcodes-db:
     image: idealpostcodes/postcodes.io.db:latest
@@ -44,12 +38,6 @@ accessories:
         - POSTGRES_PASSWORD
     volumes:
       - /data/postgres:/var/lib/postgresql/data
-    # Add health check
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postcodesio -d postcodesio"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
 
   postcodes-app:
     image: mayur311002/vrp_new_app_postcodes_app:latest-arm64
@@ -60,12 +48,6 @@ accessories:
         DATABASE_URL: postgresql://postcodesio:${POSTGRES_PASSWORD}@postcodes-db:5432/postcodesio
       secret:
         - POSTGRES_PASSWORD
-    # Add health check
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
 
 builder:
   arch: arm64
