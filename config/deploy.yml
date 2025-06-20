@@ -14,22 +14,32 @@ env:
     POSTCODES_IO_URL: http://postcodes-app:8000
     OSRM_URL: http://osrm:5000
     STREAMLIT_SERVER_ADDRESS: 0.0.0.0
-    # Remove STREAMLIT_SERVER_PORT since we're using port 80
     STREAMLIT_BROWSER_SERVER_HEADLESS: true
-    # Remove KAMAL_CONTAINER_PORT since we're using default port 80
+
+# Add Traefik configuration
+traefik:
+  publish:
+    - "80:80"
+    - "443:443"
+  options:
+    volume: "/var/run/docker.sock:/var/run/docker.sock"
+
 accessories:
   osrm:
     image: mayur311002/vrp_new_app_osrm:latest-arm64
     host: 157.180.87.7
     port: "5000:5000"
-    network: vrp-network
+    network: kamal  # Changed to kamal network
     volumes:
       - /data/osrm:/data
     cmd: osrm-routed --algorithm mld /data/united-kingdom-latest.osrm
+    labels:
+      - "traefik.enable=false"  # Don't expose through Traefik
+
   postcodes-db:
     image: idealpostcodes/postcodes.io.db:latest
     host: 157.180.87.7
-    port: "5432:5432"
+    network: kamal  # Changed to kamal network
     env:
       clear:
         POSTGRES_USER: postcodesio
@@ -38,16 +48,20 @@ accessories:
         - POSTGRES_PASSWORD
     volumes:
       - /data/postgres:/var/lib/postgresql/data
-    network: vrp-network
+    labels:
+      - "traefik.enable=false"
+
   postcodes-app:
     image: mayur311002/vrp_new_app_postcodes_app:latest-arm64
     host: 157.180.87.7
-    port: "8000:8000"
+    network: kamal  # Changed to kamal network
     env:
       clear:
         DATABASE_URL: postgresql://postcodesio:${POSTGRES_PASSWORD}@postcodes-db:5432/postcodesio
       secret:
         - POSTGRES_PASSWORD
-    network: vrp-network
+    labels:
+      - "traefik.enable=false"
+
 builder:
   arch: arm64
