@@ -1,18 +1,9 @@
 service: vrp-app
-image: mayur311002/vrp_new_app_app-arm64
+image: mayur311002/vrp_new_app_app-arm64:latest
 servers:
   - 157.180.87.7
-
-# Add this roles section
-roles:
-  web:
-    hosts:
-      - 157.180.87.7
-    port: 8501
-    healthcheck:
-      path: /_stcore/health
-      port: 8501
-
+network:
+  - vrp-network
 registry:
   username: mayur311002
   password:
@@ -26,6 +17,16 @@ env:
     STREAMLIT_SERVER_ADDRESS: 0.0.0.0
     STREAMLIT_SERVER_PORT: 8501
     STREAMLIT_BROWSER_SERVER_HEADLESS: true
+    STREAMLIT_SERVER_ENABLE_CORS: false
+labels:
+  traefik.enable: true
+  traefik.http.routers.vrp-app.rule: PathPrefix(`/_stcore`)
+  traefik.http.routers.vrp-app.entrypoints: web
+  traefik.http.services: vrp-app.loadbalancer.server.port: 8501
+  traefik.http.services.vrp-app.loadbalancer.healthcheck.path: /_stcore/health
+  traefik.http.services.vrp-app.loadbalancer.healthcheck.interval: 5s
+  traefik.http.services.vrp-app.loadbalancer.healthcheck.timeout: 3s
+  traefik.http.services.vrp-app.loadbalancer.healthcheck.retries: 3
 accessories:
   osrm:
     image: mayur311002/vrp_new_app_osrm:latest-arm64
@@ -34,27 +35,26 @@ accessories:
     network: vrp-network
     volumes:
       - /data/osrm:/data
-    cmd: osrm-routed --algorithm mld /data/united-kingdom-latest.osrm
-  postcodes-db:
+    cmd: "/usr/local/bin/osrm-routed --algorithm=mld /data/united-kingdom-latest.osrm/data"
+  postcodes:
     image: idealpostcodes/postcodes.io.db:latest
     host: 157.180.87.7
-    port: "5432:5432"
+    ports: "5432:5432"
     env:
-      clear:
-        POSTGRES_USER: postcodesio
-        POSTGRES_DATABASE: postcodesio
+      POSTGRES_USER: postcodesio
+      POSTGRES_DB: postcodesio
       secret:
-        - POSTGRES_PASSWORD
+        - POSTGRES_SECRET
     volumes:
-      - /data/postgres:/var/lib/postgresql/data
-    network: vrp-network
+      - /data/postgres:/var/lib/postgres/data
+    network:
+      - vrp-network
   postcodes-app:
-    image: mayur311002/vrp_new_app_postcodes_app:latest-arm64
+    image: mayur311002/vrp_new_app_postcodes:latest-arm64
     host: 157.180.87.7
     port: "8000:8000"
     env:
-      clear:
-        DATABASE_URL: postgresql://postcodesio:${POSTGRES_PASSWORD}@postcodes-db:5432/postcodesio
+      DATABASE_URL: postgres://postcodesio:${POSTGRES_PASSWORD}@postcodes_db:5432/postcodesio
       secret:
         - POSTGRES_PASSWORD
     network: vrp-network
