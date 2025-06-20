@@ -1,56 +1,57 @@
 service: vrp-app
 image: mayur311002/vrp_new_app-arm64:latest
 servers:
-  - 157.180.207.35
+  - 157.180.207.7
 registry:
   username: mayur311002
   password:
-    secret:
-      - KAMAL_REGISTRY_PASSWORD
+    - KAMAL_REGISTRY_PASSWORD
 ssh:
   user: root
 env:
   clear:
     POSTCODES_IO_URL: http://postcodes-app:8000
-    OSRM_URL: http://osrm-routed:5000
-    STREAMLIT_PORT: 8501
-    STREAMLITER_ADDRESS: 127.0.0.1
-    BROWSER_HEADLESS: True
-    CORS_ENABLED: False
+    OSRM_URL: http://osrm:5000
+    STREAMLIT_SERVER_PORT: 8501
+    STREAMLIT_SERVER_ADDRESS: 0.0.0.0
+    STREAMLIT_BROWSER_SERVER_HEADLESS: true
+    STREAMLIT_SERVER_ENABLE_CORS: false
 labels:
-  traefik_enabled: True
-  traefik_router_rule: PathPrefix=/_stcore/
-  traefik_entrypoint: Web
-  traefik_service_port: 8501
-  health_check_path: /healthz/
-  health_check_interval: 10s
-  health_check_timeout: 5s
-  health_check_retries: 3
+  traefik.enable: true
+  traefik.http.routers.vrp-app.rule: PathPrefix(`/_stcore`)
+  traefik.http.routers.vrp-app.entrypoints: web
+  traefik.http.services.vrp-app.loadbalancer.server.port: 8501
+  traefik.http.services.vrp-app.loadbalancer.healthcheck.path: /_stcore/health
+  traefik.http.services.vrp-app.loadbalancer.healthcheck.interval: 10s
+  traefik.http.services.vrp-app.loadbalancer.healthcheck.timeout: 5s
+  traefik.http.services.vrp-app.loadbalancer.healthcheck.retries: 3
 accessories:
   osrm:
-    image: osrm/osrm-backend:latest
-    host: localhost
-    port: 8000
+    image: mayur311002/vrp_new_app_osrm:latest-arm64
+    host: 157.180.207.7
+    port: "5000:5000"
     volumes:
-      - /data/osrm:/mnt/data
-    cmd: /usr/local/bin/osrm-routed --algo=mld /mnt/data/osrm
-  postcodes:
-    image: postgres:latest
-    host: localhost
-    port: 5432
+      - /data/osrm:/data
+    cmd: "/usr/local/bin/osrm-routed --algo=mld /data/united-kingdom-latest.osrm"
+  postcodes-db:
+    image: idealpostcodes/postcodes.io.db:latest
+    host: 157.180.207.7
+    port: "5432:5432"
     env:
-      POSTGRES_USER: postcodesio
-      POSTGRES_DB: postcodes
+      clear:
+        POSTGRES_USER: postcodesio
+        POSTGRES_DATABASE: postcodes
       secret:
         - POSTGRES_PASSWORD
     volumes:
-      - /data/postgres:/var/lib/postgres/data
+      - /data/postgres:/var/lib/postgresql/data
   postcodes-app:
-    image: mayur311002/vrp_new_app_postcodes:latest-arm64
-    host: localhost
-    port: 8080
+    image: mayur311002/vrp_new_app_postcodes_app:latest-arm64
+    host: 157.180.207.7
+    port: "8000:8000"
     env:
-      DATABASE_URL: postgres://postcodesio:${POSTGRES_PASSWORD}@postcodes:5432/postcodes
+      clear:
+        DATABASE_URL: postgresql://postcodesio:${POSTGRES_PASSWORD}@postcodes-db:5432/postcodes
       secret:
         - POSTGRES_PASSWORD
 builder:
