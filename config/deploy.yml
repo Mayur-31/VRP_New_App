@@ -16,16 +16,21 @@ env:
     STREAMLIT_SERVER_PORT: 8501
     STREAMLIT_BROWSER_SERVER_HEADLESS: true
     STREAMLIT_SERVER_ENABLE_CORS: false
-port: "8501:8501"
-labels:
-  - "traefik.enable=true"
-  - "traefik.http.routers.vrp-app.rule=PathPrefix(`/_stcore/health`)"
-  - "traefik.http.routers.vrp-app.entrypoints=web"
-  - "traefik.http.services.vrp-app.loadbalancer.server.port=8501"
-  - "traefik.http.services.vrp-app.loadbalancer.healthcheck.path=/_stcore/health"
-  - "traefik.http.services.vrp-app.loadbalancer.healthcheck.interval=10s"
-  - "traefik.http.services.vrp-app.loadbalancer.healthcheck.timeout=5s"
-  - "traefik.http.services.vrp-app.loadbalancer.healthcheck.retries=3"
+
+# Docker runtime arguments (correct key for Kamal 2.3.0)
+args:
+  # Port mapping
+  publish: "8501:8501"
+  
+  # Network configuration
+  network: "kamal,vrp-network"
+  
+  # Health check
+  health-cmd: "curl -f http://localhost:8501/_stcore/health || exit 1"
+  health-interval: "10s"
+  health-timeout: "5s"
+  health-retries: "3"
+
 accessories:
   osrm:
     image: mayur311002/vrp_new_app_osrm:latest-arm64
@@ -34,6 +39,9 @@ accessories:
     volumes:
       - /data/osrm:/data
     cmd: osrm-routed --algorithm mld /data/united-kingdom-latest.osrm
+    args:
+      network: "vrp-network"
+
   postcodes-db:
     image: idealpostcodes/postcodes.io.db:latest
     host: 157.180.87.7
@@ -46,6 +54,9 @@ accessories:
         - POSTGRES_PASSWORD
     volumes:
       - /data/postgres:/var/lib/postgresql/data
+    args:
+      network: "vrp-network"
+
   postcodes-app:
     image: mayur311002/vrp_new_app_postcodes_app:latest-arm64
     host: 157.180.87.7
@@ -55,5 +66,8 @@ accessories:
         DATABASE_URL: postgresql://postcodesio:${POSTGRES_PASSWORD}@postcodes-db:5432/postcodesio
       secret:
         - POSTGRES_PASSWORD
+    args:
+      network: "vrp-network"
+
 builder:
   arch: arm64
