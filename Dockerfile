@@ -17,6 +17,6 @@ RUN chmod +x /healthcheck.sh
 HEALTHCHECK --interval=5s --timeout=3s \
   CMD /healthcheck.sh || exit 1
 
-# Wait for dependencies before starting
-CMD wait-for-it -t 30 osrm:5000 postcodes-app:8000 -- \
+# Increase timeout to 120 seconds for dependencies
+CMD wait-for-it -t 120 osrm:5000 postcodes-app:8000 -- \
     streamlit run app.py --server.port=80 --server.address=0.0.0.0
