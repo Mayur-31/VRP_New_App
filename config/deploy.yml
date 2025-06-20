@@ -14,10 +14,9 @@ env:
     POSTCODES_IO_URL: http://postcodes-app:8000
     OSRM_URL: http://osrm:5000
     STREAMLIT_SERVER_ADDRESS: 0.0.0.0
-    STREAMLIT_SERVER_PORT: 8501
+    # Remove STREAMLIT_SERVER_PORT since we're using port 80
     STREAMLIT_BROWSER_SERVER_HEADLESS: true
-    # Specify container port for Kamal
-    KAMAL_CONTAINER_PORT: 8501
+    # Remove KAMAL_CONTAINER_PORT since we're using default port 80
 accessories:
   osrm:
     image: mayur311002/vrp_new_app_osrm:latest-arm64

@@ -17,4 +17,5 @@ RUN chmod +x /healthcheck.sh
 HEALTHCHECK --interval=5s --timeout=3s \
   CMD /healthcheck.sh || exit 1
 
-CMD ["streamlit", "run", "app.py", "--server.port=8501", "--server.address=0.0.0.0"]
+# Run on port 80 instead of 8501
+CMD ["streamlit", "run", "app.py", "--server.port=80", "--server.address=0.0.0.0"]
