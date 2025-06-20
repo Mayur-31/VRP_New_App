@@ -21,33 +21,47 @@ accessories:
     image: mayur311002/vrp_new_app_osrm:latest-arm64
     host: 157.180.87.7
     port: "5000:5000"
-    network: kamal
     volumes:
       - /data/osrm:/data
     cmd: osrm-routed --algorithm mld /data/united-kingdom-latest.osrm
+    options:  # Converted to hash format
+      network: kamal
+      name: osrm
+      restart: unless-stopped
+      "log-opt": max-size=10m
 
   postcodes-db:
-    image: idealpostcodes/postcodes.io.db:latest
+    image: postgres:15-alpine
     host: 157.180.87.7
-    network: kamal
     env:
       clear:
         POSTGRES_USER: postcodesio
-        POSTGRES_DATABASE: postcodesio
+        POSTGRES_DB: postcodesio
       secret:
         - POSTGRES_PASSWORD
     volumes:
       - /data/postgres:/var/lib/postgresql/data
+    options:  # Converted to hash format
+      network: kamal
+      name: postcodes-db
+      restart: unless-stopped
 
   postcodes-app:
     image: mayur311002/vrp_new_app_postcodes_app:latest-arm64
     host: 157.180.87.7
-    network: kamal
     env:
       clear:
         DATABASE_URL: postgresql://postcodesio:${POSTGRES_PASSWORD}@postcodes-db:5432/postcodesio
       secret:
         - POSTGRES_PASSWORD
+    options:  # Converted to hash format
+      network: kamal
+      name: postcodes-app
+      restart: unless-stopped
+    port: "8000:8000"  # Added port mapping
+    cmd: >
+      bash -c 'wait-for-it postcodes-db:5432 --timeout=120 -- 
+      ./entrypoint.sh'
 
 builder:
   arch: arm64
