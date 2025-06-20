@@ -2,8 +2,7 @@ service: vrp-app
 image: mayur311002/vrp_new_app_app-arm64:latest
 servers:
   - 157.180.87.7
-network:
-  - vrp-network
+network: vrp-network
 registry:
   username: mayur311002
   password:
@@ -22,7 +21,7 @@ labels:
   traefik.enable: true
   traefik.http.routers.vrp-app.rule: PathPrefix(`/_stcore`)
   traefik.http.routers.vrp-app.entrypoints: web
-  traefik.http.services: vrp-app.loadbalancer.server.port: 8501
+  traefik.http.services.vrp-app.loadbalancer.server.port: 8501
   traefik.http.services.vrp-app.loadbalancer.healthcheck.path: /_stcore/health
   traefik.http.services.vrp-app.loadbalancer.healthcheck.interval: 5s
   traefik.http.services.vrp-app.loadbalancer.healthcheck.timeout: 3s
@@ -35,26 +34,27 @@ accessories:
     network: vrp-network
     volumes:
       - /data/osrm:/data
-    cmd: "/usr/local/bin/osrm-routed --algorithm=mld /data/united-kingdom-latest.osrm/data"
+    cmd: "/usr/local/bin/osrm-routed --algorithm=mld /data/united-kingdom-latest.osrm"
   postcodes:
     image: idealpostcodes/postcodes.io.db:latest
     host: 157.180.87.7
-    ports: "5432:5432"
+    port: "5432:5432"
     env:
-      POSTGRES_USER: postcodesio
-      POSTGRES_DB: postcodesio
+      clear:
+        POSTGRES_USER: postcodesio
+        POSTGRES_DB: postcodesio
       secret:
-        - POSTGRES_SECRET
+        - POSTGRES_PASSWORD
     volumes:
-      - /data/postgres:/var/lib/postgres/data
-    network:
-      - vrp-network
+      - /data/postgres:/var/lib/postgresql/data
+    network: vrp-network
   postcodes-app:
     image: mayur311002/vrp_new_app_postcodes:latest-arm64
     host: 157.180.87.7
     port: "8000:8000"
     env:
-      DATABASE_URL: postgres://postcodesio:${POSTGRES_PASSWORD}@postcodes_db:5432/postcodesio
+      clear:
+        DATABASE_URL: postgres://postcodesio:${POSTGRES_PASSWORD}@postcodes:5432/postcodesio
       secret:
         - POSTGRES_PASSWORD
     network: vrp-network
