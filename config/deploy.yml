@@ -1,12 +1,18 @@
 service: vrp-app
-# Use architecture in the image name but without colon
 image: mayur311002/vrp_new_app_app-arm64
 servers:
   - 157.180.87.7
-port: 8501  # Add this
-healthcheck:
-  path: /_stcore/health
-  port: 8501
+
+# Add this roles section
+roles:
+  web:
+    hosts:
+      - 157.180.87.7
+    port: 8501
+    healthcheck:
+      path: /_stcore/health
+      port: 8501
+
 registry:
   username: mayur311002
   password:
