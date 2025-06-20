@@ -16,30 +16,22 @@ env:
     STREAMLIT_SERVER_ADDRESS: 0.0.0.0
     STREAMLIT_BROWSER_SERVER_HEADLESS: true
 
-# Add Traefik configuration
-traefik:
-  publish:
-    - "80:80"
-    - "443:443"
-  options:
-    volume: "/var/run/docker.sock:/var/run/docker.sock"
+# REMOVED Traefik section - Kamal handles proxy automatically
 
 accessories:
   osrm:
     image: mayur311002/vrp_new_app_osrm:latest-arm64
     host: 157.180.87.7
     port: "5000:5000"
-    network: kamal  # Changed to kamal network
+    network: kamal
     volumes:
       - /data/osrm:/data
     cmd: osrm-routed --algorithm mld /data/united-kingdom-latest.osrm
-    labels:
-      - "traefik.enable=false"  # Don't expose through Traefik
 
   postcodes-db:
     image: idealpostcodes/postcodes.io.db:latest
     host: 157.180.87.7
-    network: kamal  # Changed to kamal network
+    network: kamal
     env:
       clear:
         POSTGRES_USER: postcodesio
@@ -48,20 +40,16 @@ accessories:
         - POSTGRES_PASSWORD
     volumes:
       - /data/postgres:/var/lib/postgresql/data
-    labels:
-      - "traefik.enable=false"
 
   postcodes-app:
     image: mayur311002/vrp_new_app_postcodes_app:latest-arm64
     host: 157.180.87.7
-    network: kamal  # Changed to kamal network
+    network: kamal
     env:
       clear:
         DATABASE_URL: postgresql://postcodesio:${POSTGRES_PASSWORD}@postcodes-db:5432/postcodesio
       secret:
         - POSTGRES_PASSWORD
-    labels:
-      - "traefik.enable=false"
 
 builder:
   arch: arm64
