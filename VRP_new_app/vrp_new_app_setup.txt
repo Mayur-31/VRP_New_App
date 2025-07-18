@@ -1,0 +1,213 @@
+Today's date and time is 05:25 PM IST on Friday, July 18, 2025.
+
+Project Setup and Deployment Instructions for vrp_new_app
+
+Overview
+The vrp_new_app project is a vehicle routing optimization application that uses Docker, OSRM, Postcodes.io, and Kamal for deployment. This guide provides step-by-step instructions to set up the project locally on WSL Ubuntu 24.04.2 LTS and deploy it to a remote server at 157.180.87.7.
+
+Prerequisites
+Before starting, ensure you have the following:
+
+1. Docker
+   - Install Docker Desktop on Windows and enable WSL 2 integration.
+   - Verify with:
+     ```
+     docker --version
+     ```
+
+2. DockerHub Account
+   - Sign up at https://hub.docker.com/
+
+3. Git
+   - Install on WSL Ubuntu:
+     ```
+     sudo apt-get install git
+     ```
+   - Verify with:
+     ```
+     git --version
+     ```
+
+4. Python
+   - Install on WSL Ubuntu:
+     ```
+     sudo apt-get install python3 python3-pip
+     ```
+   - Verify with:
+     ```
+     python3 --version
+     ```
+
+5. OpenCage API Key (Optional)
+   - Sign up at https://opencagedata.com/
+
+Setup Steps
+
+1. Clone the Repository
+   - Open WSL Ubuntu:
+     ```
+     wsl -d ubuntu
+     ```
+   - Navigate and clone:
+     ```
+     cd /mnt/c/Company\ work/VRP_new_app
+     git clone https://github.com/your_username/VRP_new_app.git
+     cd VRP_new_app
+     ```
+   - Replace your_username with the actual GitHub username.
+
+2. Download OSRM Data Files
+   - Install requests:
+     ```
+     pip3 install requests
+     ```
+   - Run:
+     ```
+     python3 download_osrm_files.py
+     ```
+   - Verify:
+     ```
+     ls -lh ./osrm
+     ```
+
+3. Update Credential Placeholders
+   - Edit docker-compose.yaml:
+     ```
+     services:
+       postcodes-db:
+         environment:
+           - POSTGRES_PASSWORD=your_secure_password
+       postcodes-app:
+         environment:
+           - DATABASE_URL=postgresql://postcodesio:your_secure_password@postcodes-db:5432/postcodesio
+     ```
+   - Set environment variables:
+     ```
+     export KAMAL_REGISTRY_PASSWORD=your_dockerhub_password
+     export POSTGRES_PASSWORD=your_secure_password
+     export OPENCAGE_API_KEY=your_opencage_key
+     ```
+
+4. Build Docker Images
+   - Run:
+     ```
+     docker-compose build
+     ```
+
+5. Run the Application Locally
+   - Start services:
+     ```
+     docker-compose up -d
+     ```
+   - Verify:
+     ```
+     docker-compose ps
+     ```
+   - Test:
+     - Streamlit: http://localhost:8501
+     - OSRM:
+       ```
+       curl "http://localhost:5000/route/v1/driving/-2.0,54.0;-1.9,54.1"
+       ```
+     - Postcodes.io:
+       ```
+       curl -v http://localhost:8000/postcodes/EC1A1BB
+       ```
+
+6. Prepare the Remote Server
+   - SSH:
+     ```
+     ssh root@157.180.87.7
+     ```
+   - Firewall:
+     ```
+     sudo ufw allow 22
+     sudo ufw allow 80
+     sudo ufw allow 443
+     sudo ufw enable
+     ```
+
+7. Configure Kamal
+   - Edit config/deploy.yml:
+     ```
+     image: your_dockerhub_username/vrp_new_app_app:latest
+     servers:
+       web:
+         - 157.180.87.7
+     registry:
+       username: your_dockerhub_username
+     ```
+   - Ensure .kamal/secrets has:
+     ```
+     KAMAL_REGISTRY_PASSWORD=your_dockerhub_password
+     POSTGRES_PASSWORD=your_secure_password
+     ```
+
+8. Build and Push Images
+   - Build and tag:
+     ```
+     docker build -t your_dockerhub_username/vrp_new_app_app:latest .
+     docker build -t your_dockerhub_username/vrp_new_app_osrm:latest ./osrm
+     docker build -t your_dockerhub_username/vrp_new_appiwara
+
+9. Kamal Setup
+   - Install Kamal:
+     ```
+     gem install kamal
+     ```
+   - Run:
+     ```
+     kamal setup
+     ```
+
+10. Kamal Deploy
+    - Run:
+      ```
+      kamal deploy
+      ```
+
+11. Verify Deployment
+    - Streamlit: http://157.180.87.7:8501
+    - OSRM:
+      ```
+      curl "http://157.180.87.7:5000/route/v1/driving/-2.0,54.0;-1.9,54.1"
+      ```
+    - Postcodes.io:
+      ```
+      curl -v http://157.180.87.7:8000/postcodes/EC1A1BB
+      ```
+
+Troubleshooting
+
+- Postcodes.io 500 Error:
+  - Check logs:
+    ```
+    docker-compose juice postcodes-app
+    ```
+  - Verify database:
+    ```
+    docker exec -it postcodes-db psql -U postcodesio -d postcodesio -c "SELECT COUNT(*) FROM postcodes;"
+    ```
+
+- OSRM Issues:
+  - Ensure ./osrm files are present.
+
+- Kamal Failures:
+  - Check logs:
+    ```
+    kamal app logs
+    ```
+  - Verify SSH:
+    ```
+    ssh root@157.180.87.7
+    ```
+
+Notes
+- Replace placeholders with actual values.
+- For production, use secrets management.
+- Rebuild images after configuration changes:
+  ```
+  docker-compose build
+  ```
+
+This guide provides a complete setup and deployment process for vrp_new_app using Kamal on Ubuntu 24.04.2 LTS.

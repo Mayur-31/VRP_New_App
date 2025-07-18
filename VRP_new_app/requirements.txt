@@ -1,0 +1,12 @@
+streamlit
+pandas
+requests
+geopy
+ortools
+folium
+polyline
+numpy
+tqdm
+playwright  # Added for E2E testing
+pytest-playwright  # Added for E2E testing
+tenacity==8.2.3

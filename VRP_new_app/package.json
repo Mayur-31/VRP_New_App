@@ -1,0 +1,11 @@
+{
+  "name": "vrp-test",
+  "version": "1.0.0",
+  "description": "Playwright tests for VRP Streamlit app",
+  "dependencies": {
+    "playwright": "^1.39.0"
+  },
+  "scripts": {
+    "test": "node tests/test_app.js"
+  }
+}
